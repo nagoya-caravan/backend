@@ -9,7 +9,11 @@ dotenv.load_dotenv()
 app = Flask(__name__)
 
 db_user = os.getenv("DB_USER")
+if db_user is None:
+    raise ValueError("DB_USER must not be None")
 db_pass = os.getenv("DB_PASS")
+if db_pass is None:
+    raise ValueError("DB_PASS must not be None")
 db_host = os.getenv("DB_HOST")
 if db_host is None:
     db_host = "localhost"

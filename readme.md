@@ -12,6 +12,10 @@
 ```shell
 pip install -r requirements.txt
 ```
+### copy .env and modify
+```shell
+cp ./.env.sample ./.env
+```
 
 ### flask run
 
