@@ -1,0 +1,9 @@
+
+/venv/
+/node_modules/
+/instance/
+/public/built/
+/.idea/httpRequests/
+/.idea/misc.xml
+/.idea/test.iml
+/public/
