@@ -25,7 +25,7 @@ Content-Type: application/json
 ## カレンダー編集
 
 ```http request
-GET /api/calender/:calender-id
+PUT /api/calender/:calender-id
 Content-Type: application/json
 ```
 
@@ -82,7 +82,7 @@ Content-Type: application/json
 ## イベント編集
 
 ```http request
-POST /api/calender/:calender-id/event/<id>
+PUT /api/calender/:calender-id/event/<id>
 Content-Type: application/json
 ```
 
@@ -93,7 +93,7 @@ Content-Type: application/json
 ## イベントリスト
 
 ```http request
-POST /api/calender/<calender-id>/event?start,end
+GET /api/calender/<calender-id>/event?start,end
 Content-Type: application/json
 ```
 
@@ -105,7 +105,7 @@ Content-Type: application/json
 ## 公開イベントリスト
 
 ```http request
-POST /api/calender/<calender-id>/public-event?start,end
+GET /api/calender/<calender-id>/public-event?start,end
 Content-Type: application/json
 ```
 
