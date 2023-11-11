@@ -32,5 +32,10 @@ jwt = JWTManager(app)
 db: SQLAlchemy = SQLAlchemy()
 db.init_app(app)
 
+# noinspection PyUnresolvedReferences
+import backend.api
+# noinspection PyUnresolvedReferences
+import backend.model
+
 with app.app_context():
     db.create_all()
