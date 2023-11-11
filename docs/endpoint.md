@@ -14,7 +14,7 @@ Content-Type: application/json
 
 **body**
 
-> [CalenderInfo](object.md#calenderinfo)
+> [Calender](object.md#calender)
 
 **response**
 
@@ -31,7 +31,7 @@ Content-Type: application/json
 
 **body**
 
-> [CalenderInfo](object.md#calenderinfo)
+> [Calender](object.md#calender)
 
 ***
 
@@ -52,7 +52,7 @@ Content-Type: application/json
 **response**
 
 > [
-> [CalenderInfo](object.md#calenderinfo)
+> [Calender](object.md#calender)
 > ]
 
 ***
@@ -66,7 +66,7 @@ Content-Type: application/json
 
 **response**
 
-> [CalenderInfo](object.md#calenderinfo)
+> [Calender](object.md#calender)
 
 ***
 

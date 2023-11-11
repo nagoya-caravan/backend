@@ -2,23 +2,17 @@
 
 * Typeは[object](object.md)を表す
 
-## CalenderInfo
+## Calender
 
 ```json
 {
   "calender_id": "resource-id",
   "calender_name": "calender-name",
-  "event_list_url": "event-list-url"
+  "ical_urls": [
+    "url",
+    "url"
+  ]
 }
-```
-***
-
-## Event
-
-```json
-[
-  "Type: Event"
-]
 ```
 
 ***
@@ -27,8 +21,8 @@
 
 ```json
 {
-  "event_url": "event-url",
   "event_id": "event-id",
+  "calender_id": "calender-id",
   "is_show": true,
   "event_title": "event-title",
   "description": "description",
