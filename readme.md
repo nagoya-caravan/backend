@@ -1,5 +1,6 @@
 # backend
 
+* [structure](./docs/img/structure.png)
 * [endpoint](./docs/endpoint.md)
 * [object](./docs/object.md)
 
