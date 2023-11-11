@@ -8,7 +8,6 @@ from flask_sqlalchemy import SQLAlchemy
 dotenv.load_dotenv()
 app = Flask(__name__)
 
-
 db_user = os.getenv("DB_USER")
 if db_user is None:
     raise ValueError("DB_USER must not be None")
@@ -33,7 +32,7 @@ app.config["JWT_SECRET_KEY"] = os.getenv("LOGIN_SECRET")
 import backend.api
 # noinspection PyUnresolvedReferences
 import backend.model
-
+# noinspection PyUnresolvedReferences
 
 jwt = JWTManager(app)
 db: SQLAlchemy = SQLAlchemy()

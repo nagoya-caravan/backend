@@ -1,12 +1,6 @@
 from dataclasses import dataclass
 
 
-@dataclass
-class Calender:
-    calender_id: int
-    calender_name: str
-    ical_urls: list[str]
-
 
 @dataclass
 class Event:
