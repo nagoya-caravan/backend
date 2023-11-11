@@ -1,0 +1,33 @@
+name: edit manifest
+
+on:
+  push:
+    branches:
+      - develop
+      - feature/#1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: checkout manifest repository
+        uses: actions/checkout@v3
+        with:
+          repository: nagoya-caravan/hazakura-k8s
+          ref: main
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: edit manifest
+        run: |
+          yq -i '.spec.template.spec.initContainers[1].env[0].value = "${{ github.sha }}"' ./backend/backend.yml
+
+      - name: push
+        run: |
+          git config user.name githubActions
+          git config user.email bot@example.com
+          git add .
+          git commit --author=. -m "update src"
+          git push
