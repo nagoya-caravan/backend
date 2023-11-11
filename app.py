@@ -28,15 +28,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_pass}@{d
 app.config['JSON_AS_ASCII'] = False
 app.config["JWT_SECRET_KEY"] = os.getenv("LOGIN_SECRET")
 
+jwt = JWTManager(app)
+db: SQLAlchemy = SQLAlchemy()
+db.init_app(app)
+
 # noinspection PyUnresolvedReferences
 import backend.api
 # noinspection PyUnresolvedReferences
 import backend.model
-# noinspection PyUnresolvedReferences
-
-jwt = JWTManager(app)
-db: SQLAlchemy = SQLAlchemy()
-db.init_app(app)
 
 with app.app_context():
     db.create_all()

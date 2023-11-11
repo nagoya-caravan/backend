@@ -18,7 +18,11 @@ Content-Type: application/json
 
 **response**
 
-> CalenderId: int
+```json
+{
+  "calender_id": 0
+}
+```
 
 ***
 
