@@ -31,3 +31,12 @@
   "location": "location"
 }
 ```
+
+## Error
+
+```json
+{
+  "error_id": "error id",
+  "message": "message"
+}
+```
