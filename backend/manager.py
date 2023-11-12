@@ -1,5 +1,6 @@
 from app import db
 from backend.json import CalenderIdJson, CalenderJson
+from backend.model import CalenderModel
 from backend.repository import CalenderRepository, IcalUrlRepository, EventRepository
 
 
@@ -37,10 +38,10 @@ class CalenderManager:
 
     @staticmethod
     def create(calender_name: str, ical_urls: list[str]):
-        result = CalenderRepository.create(calender_name)
-        IcalUrlRepository.save(result.ical_url_id, ical_urls)
+        result: CalenderModel = CalenderRepository.create(calender_name)
+        IcalUrlRepository.save(result.calender_id, ical_urls)
         db.session.commit()
-        return CalenderIdJson(result.ical_url_id)
+        return CalenderIdJson(result.calender_id)
 
     @staticmethod
     def edit(calender_id: int, calender_name: str, ical_urls: list[str]):

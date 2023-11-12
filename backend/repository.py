@@ -49,6 +49,9 @@ class IcalUrlRepository:
             new_model = IcalUrlModel(url, calender_id)
             edited_models.append(new_model)
             db.session.add(new_model)
+            db.session.commit()
+            EventRepository.refresh_ical_url(new_model.ical_id, url)
+
         return edited_models
 
 
@@ -93,8 +96,14 @@ class EventRepository:
 
     @staticmethod
     def refresh_ical_url(ical_url_id: int, url: str):
-        response: client.HTTPResponse = request.urlopen(request.Request(url))
-        ical = ics.Calendar(response.read())
+        with request.urlopen(request.Request(url)) as response:
+            response: client.HTTPResponse
+            ical_text = response.read().decode("utf-8")
+        try:
+            ical = ics.Calendar(ical_text)
+        except TypeError:
+            print(ical_text)
+            raise ErrorIdException(ErrorIds.ICAL_NOT_VALID)
         EventRepository.refresh_ical_event(ical_url_id, ical.events)
 
     @staticmethod
@@ -118,7 +127,10 @@ class EventRepository:
                 ical_events.remove(event)
 
         for event in ical_events:
-            new_model = EventModel()
+            new_model = EventModel(
+                ical_url_id,
+                event.uid
+            )
             new_model.event_title = event.name
             new_model.description = event.description
             new_model.start = event.begin.datetime
