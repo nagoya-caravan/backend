@@ -14,12 +14,13 @@ class CalenderJson:
 
 
 @dataclass
-class Event:
-    event_id: int
-    calender_id: int
+class EventJson:
+    ical_url_id: int
+    ical_uid: str
     is_show: bool
     event_title: str | None
     description: str | None
     start: str | None
     end: str | None
     location: str | None
+    event_id: int | None = None

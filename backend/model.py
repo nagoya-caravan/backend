@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+import datetime
+
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime
 
 from app import db
 
@@ -25,3 +27,16 @@ class CalenderModel(BaseModel, db.Model):
 
     def __init__(self, calender_name: str | None = None):
         self.calender_name = calender_name
+
+
+class EventModel(BaseModel, db.Model):
+    __tablename__ = "event"
+    event_id: int | Column = Column(Integer, primary_key=True, name="event_id", autoincrement=True)
+    ical_url_id: int | Column = Column(ForeignKey("ical_url.ical_id", ondelete="CASCADE"), nullable=False)
+    uid: str | Column = Column(String(64), nullable=False)
+    is_show: bool | Column = Column(Boolean, nullable=False)
+    event_title: str | Column = Column(String(32), nullable=False)
+    description: str | Column = Column(String(256), nullable=True)
+    start: datetime.datetime | Column = Column(DateTime, nullable=False)
+    end: datetime.datetime | Column = Column(DateTime, nullable=False)
+    location: str | Column = Column(String(256), nullable=True)

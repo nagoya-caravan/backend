@@ -13,6 +13,7 @@ class ErrorId:
 class ErrorIds(Enum):
     INTERNAL_ERROR = ErrorId("server internal error", 500)
     CALENDER_NOT_FOUND = ErrorId("calender not found", 400)
+    ICAL_URL_NOT_FOUND = ErrorId("ical url not found", 400)
 
 
 class ErrorIdException(Exception):

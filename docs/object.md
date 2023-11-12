@@ -6,7 +6,7 @@
 
 ```json
 {
-  "calender_id": "uuid",
+  "calender_id": 0,
   "calender_name": "calender-name",
   "ical_urls": [
     "url",
@@ -21,8 +21,8 @@
 
 ```json
 {
-  "event_id": "uuid",
-  "calender_id": "uuid",
+  "event_id": 0,
+  "calender_id": 0,
   "is_show": true,
   "event_title": "event-title",
   "description": "description",
