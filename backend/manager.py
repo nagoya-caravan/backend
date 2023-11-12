@@ -3,15 +3,37 @@ from backend.json import CalenderIdJson, CalenderJson
 from backend.repository import CalenderRepository, IcalUrlRepository
 
 
-class CalenderManager:
+class IcalUrlManager:
     @staticmethod
-    def get(calender_id: int):
-        calender_model = CalenderRepository.get_model(calender_id)
+    def get_urls(calender_id: int):
         ical_models = IcalUrlRepository.get_models(calender_id)
         ical_urls = list()
         for model in ical_models:
             ical_urls.append(model.url)
-        return CalenderJson(calender_model.calender_name, ical_urls, calender_id)
+        return ical_urls
+
+
+class CalenderManager:
+    @staticmethod
+    def get_list(page: int, size: int):
+        models = CalenderRepository.get_list(page, size)
+        jsons = list[CalenderJson]()
+        for model in models:
+            jsons.append(CalenderJson(
+                model.calender_name,
+                IcalUrlManager.get_urls(model.calender_id),
+                model.calender_id
+            ))
+        return jsons
+
+    @staticmethod
+    def get(calender_id: int):
+        calender_model = CalenderRepository.get_model(calender_id)
+        return CalenderJson(
+            calender_model.calender_name,
+            IcalUrlManager.get_urls(calender_id),
+            calender_id
+        )
 
     @staticmethod
     def create(calender_name: str, ical_urls: list[str]):
