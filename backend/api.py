@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from flask import request
 
 from app import app
@@ -8,7 +10,9 @@ from backend.manager import CalenderManager
 @app.route("/api/calender", methods=["POST"])
 def post_calender():
     calender = CalenderJson(**request.json)
-    return CalenderManager.create(calender.calender_name, calender.ical_urls)
+    return asdict(
+        CalenderManager.create(calender.calender_name, calender.ical_urls)
+    )
 
 
 @app.route("/api/calender/<int:calender_id>", methods=["PUT"])
@@ -17,8 +21,9 @@ def put_calender(calender_id: int):
     CalenderManager.edit(calender_id, calender.calender_name, calender.ical_urls)
     return {}
 
-#
-# @app.route("/api/calender/<int:calender_id>", methods=["GET"])
-# def get_calender(calender_id: int):
-#     calendar = CalenderJson(**request.json)
-#     CalenderRepository.
+
+@app.route("/api/calender/<int:calender_id>", methods=["GET"])
+def get_calender(calender_id: int):
+    return asdict(
+        CalenderManager.get(calender_id)
+    )

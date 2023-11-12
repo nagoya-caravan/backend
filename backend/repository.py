@@ -6,10 +6,16 @@ from backend.model import IcalUrlModel, CalenderModel
 class IcalUrlRepository:
 
     @staticmethod
-    def save(calender_id: int, ical_urls: list[str]):
-        url_models: list[IcalUrlModel] = db.session.query(IcalUrlModel).filter(
+    def get_models(calender_id: int) -> list[IcalUrlModel]:
+        return db.session.query(IcalUrlModel).filter(
             IcalUrlModel.calender_id == calender_id
         ).all()
+
+    @staticmethod
+    def save(calender_id: int, ical_urls: list[str]):
+        url_models = IcalUrlRepository.get_models(calender_id)
+        ical_urls = set(ical_urls)
+        edited_models = list[IcalUrlModel]()
 
         for url_model in url_models:
             if url_model.url not in ical_urls:
@@ -17,10 +23,13 @@ class IcalUrlRepository:
                     IcalUrlModel.ical_id == url_model.ical_id
                 ).delete()
             else:
+                edited_models.append(url_model)
                 ical_urls.remove(url_model.url)
 
         for url in ical_urls:
-            db.session.add(IcalUrlModel(url, calender_id))
+            new_model = IcalUrlModel(url, calender_id)
+            edited_models.append(new_model)
+            db.session.add(new_model)
 
 
 class CalenderRepository:
@@ -38,22 +47,14 @@ class CalenderRepository:
         return result
 
     @staticmethod
-    def create(calender_name: str, ical_urls: list[str]):
+    def create(calender_name: str):
         calender = CalenderModel(calender_name)
-
         db.session.add(calender)
         db.session.commit()
-        for url in set(ical_urls):
-            db.session.add(IcalUrlModel(url, calender.calender_id))
-        db.session.commit()
-
-        return {"calender_id": calender.calender_id}
+        return calender
 
     @staticmethod
-    def edit(calender_id: int, calender_name: str, ical_urls: list[str]):
-
-        calender: CalenderModel = CalenderRepository.get_model(calender_id)
-
+    def edit(calender_id: int, calender_name: str):
+        calender = CalenderRepository.get_model(calender_id)
         calender.calender_name = calender_name
-
-        IcalUrlRepository.save(calender_id, ical_urls)
+        return calender
