@@ -34,6 +34,10 @@ class IcalUrlRepository:
 
 class CalenderRepository:
     @staticmethod
+    def get_list(page: int, size: int):
+        return db.session.query(CalenderModel).offset(page * size).limit(size).all()
+
+    @staticmethod
     def get_model_ornone(calender_id: int) -> CalenderModel | None:
         return db.session.query(CalenderModel).filter(
             CalenderModel.calender_id == calender_id

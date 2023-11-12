@@ -27,3 +27,14 @@ def get_calender(calender_id: int):
     return asdict(
         CalenderManager.get(calender_id)
     )
+
+
+@app.route("/api/calender", methods=["GET"])
+def get_calenders():
+    result = list()
+    for calender in CalenderManager.get_list(
+            request.args.get("page", 0, int),
+            request.args.get("size", 10, int)
+    ):
+        result.append(asdict(calender))
+    return result
