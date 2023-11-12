@@ -12,9 +12,10 @@ class ErrorId:
 
 class ErrorIds(Enum):
     INTERNAL_ERROR = ErrorId("server internal error", 500)
+    CALENDER_NOT_FOUND = ErrorId("calender not found", 400)
 
 
-class ResponseException(Exception):
+class ErrorIdException(Exception):
     def __init__(self, error_id: ErrorIds, message: str | None = None):
         if message is None:
             message = error_id.value.message
@@ -22,8 +23,8 @@ class ResponseException(Exception):
         self.message = message
 
 
-@app.errorhandler(ResponseException)
-def response_exception(e: ResponseException):
+@app.errorhandler(ErrorIdException)
+def response_exception(e: ErrorIdException):
     return {
         "error_id": e.error_id.name,
         "message": e.message
@@ -32,7 +33,8 @@ def response_exception(e: ResponseException):
 
 @app.errorhandler(Exception)
 def exception(e: Exception):
+    app.logger.warning(e)
     return {
-        "error_id": ErrorIds.INTERNAL_ERROR,
+        "error_id": ErrorIds.INTERNAL_ERROR.name,
         "message": e.__str__()
     }
