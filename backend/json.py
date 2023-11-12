@@ -1,6 +1,17 @@
 from dataclasses import dataclass
 
 
+@dataclass
+class CalenderIdJson:
+    calender_id: int
+
+
+@dataclass
+class CalenderJson:
+    calender_name: str
+    ical_urls: list[str]
+    calender_id: int | None = None
+
 
 @dataclass
 class Event:
