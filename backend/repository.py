@@ -121,11 +121,7 @@ class EventRepository:
                 ).delete()
             else:
                 edited_models.append(event_model)
-                event_model.event_title = event.name or ""
-                event_model.description = event.description
-                event_model.start = event.begin.datetime
-                event_model.end = event.end.datetime
-                event_model.location = event.location
+                event_model.apply_ical(event)
                 ical_events.remove(event)
 
         for event in ical_events:
@@ -133,11 +129,7 @@ class EventRepository:
                 ical_url_id,
                 event.uid
             )
-            new_model.event_title = event.name or ""
-            new_model.description = event.description
-            new_model.start = event.begin.datetime
-            new_model.end = event.end.datetime
-            new_model.location = event.location
+            new_model.apply_ical(event)
             new_model.is_show = False
 
             edited_models.append(new_model)
