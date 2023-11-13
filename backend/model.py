@@ -5,36 +5,38 @@ from ics.grammar.parse import ContentLine
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime
 
 from app import db
+from backend.formatter import datetime_formatter
+from backend.json import EventJson, CalenderJson
 
 
 class BaseModel:
     __table_args__ = {"extend_existing": True}
 
 
-class IcalModel(BaseModel, db.Model):
-    __tablename__ = "ical"
-    ical_id: int | Column = Column(Integer, primary_key=True, name="ical_id", autoincrement=True)
-    url: str | Column = Column(String(256), nullable=False)
-    calender_id: int | Column = Column(ForeignKey("calender.calender_id", ondelete="CASCADE"), nullable=False)
-
-    def __init__(self, url: str, calender_id: int):
-        self.url = url
-        self.calender_id = calender_id
-
-
 class CalenderModel(BaseModel, db.Model):
     __tablename__ = "calender"
     calender_id: int | Column = Column(Integer, primary_key=True, name="calender_id", autoincrement=True)
     calender_name: str | Column = Column(String(16), nullable=False)
+    ical_url: str | Column = Column(String(256), nullable=False)
 
-    def __init__(self, calender_name: str | None = None):
-        self.calender_name = calender_name
+    def apply_calender_json(self, calender_json: CalenderJson):
+        if calender_json.calender_id is not None:
+            self.calender_id = calender_json.calender_id
+        self.calender_name = calender_json.calender_name
+        self.ical_url = calender_json.ical_url
+
+    def to_calender_json(self):
+        return CalenderJson(
+            self.calender_name,
+            self.ical_url,
+            self.calender_id,
+        )
 
 
 class EventModel(BaseModel, db.Model):
     __tablename__ = "event"
     event_id: int | Column = Column(Integer, primary_key=True, name="event_id", autoincrement=True)
-    ical_id: int | Column = Column(ForeignKey("ical.ical_id", ondelete="CASCADE"), nullable=False)
+    calender_id: int | Column = Column(ForeignKey("calender.calender_id", ondelete="CASCADE"), nullable=False)
     uid: str | Column = Column(String(128), nullable=False)
     is_show: bool | Column = Column(Boolean, nullable=False)
     event_title: str | Column = Column(String(64), nullable=False, default="")
@@ -47,11 +49,12 @@ class EventModel(BaseModel, db.Model):
 
     def __init__(
             self,
-            ical_url_id: int | None = None,
+            calender_id: int | None = None,
             uid: str | None = None,
     ):
-        self.ical_id = ical_url_id
-        self.uid = uid
+        if calender_id is not None:
+            self.calender_id = calender_id
+            self.uid = uid
 
     def apply_ical(self, ical_event: Event):
         self.event_title = ical_event.name or ""
@@ -64,3 +67,16 @@ class EventModel(BaseModel, db.Model):
             container: ContentLine
             if container.name == "RRULE":
                 self.rrule = container.value
+
+    def to_event_json(self):
+        return (EventJson(
+            self.calender_id,
+            self.uid,
+            self.is_show,
+            self.event_title,
+            self.description,
+            datetime_formatter.date_to_str(self.start),
+            datetime_formatter.date_to_str(self.end),
+            self.location,
+            self.event_id
+        ))

@@ -9,7 +9,7 @@ class CalenderIdJson:
 @dataclass
 class CalenderJson:
     calender_name: str
-    ical_urls: list[str]
+    ical_url: str
     calender_id: int | None = None
 
 
