@@ -22,8 +22,8 @@ class CalenderManager:
         for model in models:
             jsons.append(CalenderJson(
                 model.calender_name,
-                IcalUrlManager.get_urls(model.ical_url_id),
-                model.ical_url_id
+                IcalUrlManager.get_urls(model.ical_id),
+                model.ical_id
             ))
         return jsons
 
