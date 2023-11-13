@@ -119,7 +119,7 @@ class EventRepository:
                 ).delete()
             else:
                 edited_models.append(event_model)
-                event_model.event_title = event.name
+                event_model.event_title = event.name or ""
                 event_model.description = event.description
                 event_model.start = event.begin.datetime
                 event_model.end = event.end.datetime
@@ -131,7 +131,7 @@ class EventRepository:
                 ical_url_id,
                 event.uid
             )
-            new_model.event_title = event.name
+            new_model.event_title = event.name or ""
             new_model.description = event.description
             new_model.start = event.begin.datetime
             new_model.end = event.end.datetime
