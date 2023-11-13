@@ -15,15 +15,16 @@ class CalenderJson:
 
 @dataclass
 class EventJson:
-    ical_id: int
-    ical_uid: str
+    calender_id: int
     is_show: bool
+    start: str
+    end: str
+    ical_uid: str | None
     event_title: str | None
     description: str | None
-    start: str | None
-    end: str | None
     location: str | None
     event_id: int | None = None
+    all_day: bool = False
 
 
 @dataclass

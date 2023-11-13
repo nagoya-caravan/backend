@@ -64,7 +64,7 @@ Content-Type: application/json
 ## カレンダー取得
 
 ```http request
-GET /api/calender/:calender-id
+GET /api/calender/<calender-id>
 Content-Type: application/json
 ```
 
@@ -77,7 +77,7 @@ Content-Type: application/json
 ## カレンダー更新
 
 ```http request
-GET /api/calender/:calender-id/refresh
+GET /api/calender/<calender-id>/refresh
 Content-Type: application/json
 ```
 
