@@ -9,10 +9,7 @@
 {
   "calender_id": 0,
   "calender_name": "calender-name",
-  "ical_urls": [
-    "url",
-    "url"
-  ]
+  "ical_url": "url"
 }
 ```
 
@@ -49,4 +46,8 @@
 }
 ```
 
+## datetime
 
+```
+YYYY-mm-dd-HH-MM-SS
+```
