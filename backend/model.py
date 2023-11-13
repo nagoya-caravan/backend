@@ -9,10 +9,10 @@ class BaseModel:
     __table_args__ = {"extend_existing": True}
 
 
-class IcalUrlModel(BaseModel, db.Model):
+class IcalModel(BaseModel, db.Model):
     __tablename__ = "ical_url"
     ical_id: int | Column = Column(Integer, primary_key=True, name="ical_id", autoincrement=True)
-    url: str | Column = Column(String(128), nullable=False)
+    url: str | Column = Column(String(256), nullable=False)
     calender_id: int | Column = Column(ForeignKey("calender.calender_id", ondelete="CASCADE"), nullable=False)
 
     def __init__(self, url: str, calender_id: int):
@@ -32,7 +32,7 @@ class CalenderModel(BaseModel, db.Model):
 class EventModel(BaseModel, db.Model):
     __tablename__ = "event"
     event_id: int | Column = Column(Integer, primary_key=True, name="event_id", autoincrement=True)
-    ical_url_id: int | Column = Column(ForeignKey("ical_url.ical_id", ondelete="CASCADE"), nullable=False)
+    ical_id: int | Column = Column(ForeignKey("ical_url.ical_id", ondelete="CASCADE"), nullable=False)
     uid: str | Column = Column(String(128), nullable=False)
     is_show: bool | Column = Column(Boolean, nullable=False)
     event_title: str | Column = Column(String(64), nullable=False, default="")
@@ -46,5 +46,5 @@ class EventModel(BaseModel, db.Model):
             ical_url_id: int | None = None,
             uid: str | None = None,
     ):
-        self.ical_url_id = ical_url_id
+        self.ical_id = ical_url_id
         self.uid = uid

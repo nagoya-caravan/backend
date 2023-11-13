@@ -1,8 +1,10 @@
+import datetime
 from dataclasses import asdict
 
 from flask import request
 
 from app import app
+from backend.formatter import datetime_formatter
 from backend.json import CalenderJson, EventEditJson
 from backend.manager import CalenderManager, EventManager
 
@@ -50,3 +52,25 @@ def refresh_calender(calender_id: int):
 def put_event(event_id: int):
     EventManager.edit(event_id, EventEditJson(**request.json))
     return {}
+
+
+@app.route("/api/calender/<int:calender_id>/event", methods=["GET"])
+def get_events(calender_id: int):
+    result = list()
+    start = request.args.get("start", None)
+    if start is None:
+        start = datetime.datetime.now()
+    else:
+        start = datetime_formatter.str_to_date()
+    end = request.args.get("end", None)
+    if end is None:
+        end = datetime.datetime.now()
+    else:
+        end = datetime_formatter.str_to_date()
+    for event in EventManager.event_by_calender(
+            calender_id,
+            start,
+            end,
+    ):
+        result.append(asdict(event))
+    return result

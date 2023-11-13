@@ -1,52 +1,54 @@
+import datetime
 from http import client
 from urllib import request
 
 import ics
 from ics import Event
+from sqlalchemy import or_, and_
 
 from app import db
 from backend.error import ErrorIdException, ErrorIds
-from backend.model import IcalUrlModel, CalenderModel, EventModel
+from backend.model import IcalModel, CalenderModel, EventModel
 
 
-class IcalUrlRepository:
+class IcalRepository:
 
     @staticmethod
-    def get_models(calender_id: int) -> list[IcalUrlModel]:
-        return db.session.query(IcalUrlModel).filter(
-            IcalUrlModel.calender_id == calender_id
+    def get_models(calender_id: int) -> list[IcalModel]:
+        return db.session.query(IcalModel).filter(
+            IcalModel.calender_id == calender_id
         ).all()
 
     @staticmethod
-    def get_model_ornone(ical_url_id: int) -> IcalUrlModel | None:
-        return db.session.query(IcalUrlModel).filter(
-            IcalUrlModel.ical_url_id == ical_url_id
+    def get_model_ornone(ical_url_id: int) -> IcalModel | None:
+        return db.session.query(IcalModel).filter(
+            IcalModel.ical_url_id == ical_url_id
         ).first()
 
     @staticmethod
-    def get_model(ical_url_id: int) -> IcalUrlModel:
-        result = IcalUrlRepository.get_model_ornone(ical_url_id)
+    def get_model(ical_url_id: int) -> IcalModel:
+        result = IcalRepository.get_model_ornone(ical_url_id)
         if result is None:
             raise ErrorIdException(ErrorIds.CALENDER_NOT_FOUND)
         return result
 
     @staticmethod
     def save(calender_id: int, ical_urls: list[str]):
-        url_models = IcalUrlRepository.get_models(calender_id)
+        url_models = IcalRepository.get_models(calender_id)
         ical_urls = set(ical_urls)
-        edited_models = list[IcalUrlModel]()
+        edited_models = list[IcalModel]()
 
         for url_model in url_models:
             if url_model.url not in ical_urls:
-                db.session.query(IcalUrlModel).filter(
-                    IcalUrlModel.ical_id == url_model.ical_id
+                db.session.query(IcalModel).filter(
+                    IcalModel.ical_id == url_model.ical_id
                 ).delete()
             else:
                 edited_models.append(url_model)
                 ical_urls.remove(url_model.url)
 
         for url in ical_urls:
-            new_model = IcalUrlModel(url, calender_id)
+            new_model = IcalModel(url, calender_id)
             edited_models.append(new_model)
             db.session.add(new_model)
             db.session.commit()
@@ -91,7 +93,7 @@ class EventRepository:
     @staticmethod
     def get_events(ical_url_id: int) -> list[EventModel]:
         return db.session.query(EventModel).filter(
-            EventModel.ical_url_id == ical_url_id
+            EventModel.ical_id == ical_url_id
         ).all()
 
     @staticmethod
@@ -166,3 +168,23 @@ class EventRepository:
         return db.session.query(EventModel).filter(
             EventModel.event_id == event_id
         ).first()
+
+    @staticmethod
+    def get_list(ical_id: int, start: datetime.datetime, end: datetime.datetime) -> list[EventModel]:
+        return db.session.query(EventModel).filter(
+            EventModel.ical_id == ical_id,
+            or_(
+                and_(
+                    EventModel.start <= start,
+                    EventModel.end >= start
+                ),
+                and_(
+                    EventModel.start <= end,
+                    EventModel.end >= end
+                ),
+                and_(
+                    EventModel.start <= start,
+                    EventModel.end >= end
+                )
+            )
+        ).all()
