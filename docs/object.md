@@ -22,11 +22,13 @@
   "event_id": 0,
   "calender_id": 0,
   "is_show": true,
+  "all_day": false,
   "event_title": "event-title",
   "description": "description",
   "start": "start-date",
   "end": "end-date",
-  "location": "location"
+  "location": "location",
+  "ical_uid": "ica uid"
 }
 ```
 

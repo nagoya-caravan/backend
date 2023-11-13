@@ -74,7 +74,7 @@ class EventRepository:
         edited_models = list[EventModel]()
 
         for event_model in event_models:
-            event = EventRepository.ical_event_by_uid(ical_events, event_model.uid)
+            event = EventRepository.ical_event_by_uid(ical_events, event_model.ical_uid)
             if event is None:
                 db.session.query(EventModel).filter(
                     EventModel.event_id == event_model.event_id

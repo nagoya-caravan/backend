@@ -15,7 +15,7 @@ class CalenderJson:
 
 @dataclass
 class EventJson:
-    ical_id: int
+    calender_id: int
     ical_uid: str
     is_show: bool
     event_title: str | None
@@ -24,6 +24,7 @@ class EventJson:
     end: str | None
     location: str | None
     event_id: int | None = None
+    all_day: bool = False
 
 
 @dataclass

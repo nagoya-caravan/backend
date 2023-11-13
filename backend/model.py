@@ -37,7 +37,7 @@ class EventModel(BaseModel, db.Model):
     __tablename__ = "event"
     event_id: int | Column = Column(Integer, primary_key=True, name="event_id", autoincrement=True)
     calender_id: int | Column = Column(ForeignKey("calender.calender_id", ondelete="CASCADE"), nullable=False)
-    uid: str | Column = Column(String(128), nullable=False)
+    ical_uid: str | Column = Column(String(128), nullable=False)
     is_show: bool | Column = Column(Boolean, nullable=False)
     event_title: str | Column = Column(String(64), nullable=False, default="")
     description: str | None | Column = Column(String(1024), nullable=True)
@@ -54,7 +54,7 @@ class EventModel(BaseModel, db.Model):
     ):
         if calender_id is not None:
             self.calender_id = calender_id
-            self.uid = uid
+            self.ical_uid = uid
 
     def apply_ical(self, ical_event: Event):
         self.event_title = ical_event.name or ""
@@ -71,12 +71,13 @@ class EventModel(BaseModel, db.Model):
     def to_event_json(self):
         return (EventJson(
             self.calender_id,
-            self.uid,
+            self.ical_uid,
             self.is_show,
             self.event_title,
             self.description,
             datetime_formatter.date_to_str(self.start),
             datetime_formatter.date_to_str(self.end),
             self.location,
-            self.event_id
+            self.event_id,
+            self.all_day
         ))
