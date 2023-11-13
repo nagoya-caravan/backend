@@ -70,14 +70,14 @@ class EventModel(BaseModel, db.Model):
 
     def to_event_json(self):
         return (EventJson(
-            self.calender_id,
-            self.ical_uid,
-            self.is_show,
-            self.event_title,
-            self.description,
-            datetime_formatter.date_to_str(self.start),
-            datetime_formatter.date_to_str(self.end),
-            self.location,
-            self.event_id,
-            self.all_day
+            calender_id=self.calender_id,
+            ical_uid=self.ical_uid,
+            is_show=self.is_show,
+            event_title=self.event_title,
+            description=self.description,
+            start=datetime_formatter.date_to_str(self.start),
+            end=datetime_formatter.date_to_str(self.end),
+            location=self.location,
+            event_id=self.event_id,
+            all_day=self.all_day
         ))

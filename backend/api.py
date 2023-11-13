@@ -7,7 +7,7 @@ from app import app
 from backend.formatter import datetime_formatter
 from backend.json import CalenderJson, EventEditJson
 from backend.manager import CalenderManager, EventManager
-from backend.timezones import TzOffset
+from backend.util import DatetimeRange
 
 
 @app.route("/api/calender", methods=["POST"])
@@ -56,12 +56,7 @@ def put_event(event_id: int):
     return {}
 
 
-@app.route("/api/calender/<int:calender_id>/event", methods=["GET"])
-def get_events(calender_id: int):
-    result = list()
-
-    offset = TzOffset.offset_by_query()
-
+def get_datetime_range():
     start = request.args.get("start", None)
     if start is None:
         start = datetime.datetime.now()
@@ -75,9 +70,28 @@ def get_events(calender_id: int):
         end = end.replace(hour=23, minute=59, second=59, microsecond=999999)
     else:
         end = datetime_formatter.str_to_date(end)
+    return DatetimeRange(start, end)
 
+
+@app.route("/api/calender/<int:calender_id>/event", methods=["GET"])
+def get_events(calender_id: int):
+    result = list()
+
+    datetime_range = get_datetime_range()
     for event in EventManager.event_by_calender(
-            calender_id, start, end
+            calender_id, datetime_range
+    ):
+        result.append(asdict(event))
+    return result
+
+
+@app.route("/api/calender/<int:calender_id>/public-event", methods=["GET"])
+def get_public_events(calender_id: int):
+    result = list()
+
+    datetime_range = get_datetime_range()
+    for event in EventManager.public_event_by_calender(
+            calender_id, datetime_range
     ):
         result.append(asdict(event))
     return result

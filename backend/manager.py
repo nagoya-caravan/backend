@@ -1,5 +1,3 @@
-import datetime
-
 from dateutil.rrule import rrulestr
 
 from app import db
@@ -7,6 +5,7 @@ from backend.formatter import datetime_formatter
 from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson
 from backend.model import CalenderModel
 from backend.repository import CalenderRepository, EventRepository
+from backend.util import DatetimeRange
 
 
 class CalenderManager:
@@ -49,38 +48,51 @@ class EventManager:
     @staticmethod
     def event_by_calender(
             calender_id: int,
-            start: datetime.datetime,
-            end: datetime.datetime,
+            datetime_range: DatetimeRange,
     ):
         return EventManager.event_by_ical(
-            calender_id, start, end
+            calender_id, datetime_range
         )
+
+    @staticmethod
+    def public_event_by_calender(
+            calender_id: int,
+            datetime_range: DatetimeRange
+    ):
+        result = list[EventJson]()
+        for event in EventManager.event_by_calender(calender_id, datetime_range):
+            if event.is_show:
+                result.append(event)
+                continue
+            result.append(EventJson(
+                event.calender_id, event.is_show, event.start, event.end, None, None, None, None,
+            ))
+        return result
 
     @staticmethod
     def event_by_ical(
             calender_id: int,
-            start: datetime.datetime,
-            end: datetime.datetime,
+            check_range: DatetimeRange,
     ):
         models = EventRepository.get_list(calender_id)
         jsons = list[EventJson]()
 
         for model in models:
-            model_start = model.start
-            model_end = model.end
-            if not (end < model_start or model_end < start):
+            model_range = DatetimeRange(model.start, model.end)
+
+            if check_range.is_overlap(model_range):
                 jsons.append(model.to_event_json())
                 continue
             rrule_str = model.rrule
             if rrule_str is None:
                 continue
-            rrule = rrulestr(rrule_str, dtstart=model_start.astimezone())
+            rrule = rrulestr(rrule_str, dtstart=model_range.start.astimezone())
             for start_time in rrule:
-                end_time = start_time + (model_end - model_start)
+                end_time = start_time + model_range.during()
 
-                if end_time < start.astimezone():
+                if end_time < check_range.start.astimezone():
                     continue
-                if end.astimezone() < start_time:
+                if check_range.end.astimezone() < start_time:
                     break
                 event_json = model.to_event_json()
                 event_json.start = datetime_formatter.date_to_str(start_time)
