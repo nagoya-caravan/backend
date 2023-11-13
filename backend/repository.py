@@ -112,7 +112,7 @@ class EventRepository:
         edited_models = list[EventModel]()
 
         for event_model in event_models:
-            event = EventRepository.get_event_by_uid(ical_events, event_model.uid)
+            event = EventRepository.ical_event_by_uid(ical_events, event_model.uid)
             if event is None:
                 db.session.query(EventModel).filter(
                     EventModel.event_id == event_model.event_id
@@ -142,8 +142,27 @@ class EventRepository:
             db.session.add(new_model)
 
     @staticmethod
-    def get_event_by_uid(ical_events: set[Event], uid: str):
+    def ical_event_by_uid(ical_events: set[Event], uid: str):
         for event in ical_events:
             if event.uid == uid:
                 return event
         return None
+
+    @staticmethod
+    def edit(event_id: int, is_show: bool):
+        event = EventRepository.get_model(event_id)
+        event.is_show = is_show
+        return event
+
+    @staticmethod
+    def get_model(event_id: int):
+        result = EventRepository.get_model_ornone(event_id)
+        if result is None:
+            raise ErrorIdException(ErrorIds.CALENDER_NOT_FOUND)
+        return result
+
+    @staticmethod
+    def get_model_ornone(event_id: int) -> EventModel | None:
+        return db.session.query(EventModel).filter(
+            EventModel.event_id == event_id
+        ).first()

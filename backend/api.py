@@ -3,7 +3,7 @@ from dataclasses import asdict
 from flask import request
 
 from app import app
-from backend.json import CalenderJson
+from backend.json import CalenderJson, EventEditJson
 from backend.manager import CalenderManager, EventManager
 
 
@@ -29,12 +29,6 @@ def get_calender(calender_id: int):
     )
 
 
-@app.route("/api/calender/<int:calender_id>/refresh", methods=["GET"])
-def refresh_calender(calender_id: int):
-    EventManager.refresh(calender_id)
-    return {}
-
-
 @app.route("/api/calender", methods=["GET"])
 def get_calenders():
     result = list()
@@ -44,3 +38,15 @@ def get_calenders():
     ):
         result.append(asdict(calender))
     return result
+
+
+@app.route("/api/calender/<int:calender_id>/refresh", methods=["GET"])
+def refresh_calender(calender_id: int):
+    EventManager.refresh(calender_id)
+    return {}
+
+
+@app.route("/api/event/<int:event_id>", methods=["PUT"])
+def put_event(event_id: int):
+    EventManager.edit(event_id, EventEditJson(**request.json))
+    return {}
