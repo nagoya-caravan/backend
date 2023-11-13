@@ -7,7 +7,7 @@ class DatetimeFormatter:
     """
     format: str
 
-    def __init__(self, default_format: str = "%Y-%m-%d-%H-%M-%S-%Z"):
+    def __init__(self, default_format: str = "%Y-%m-%d-%H-%M-%S"):
         self.format = default_format
 
     def str_to_date(self, str_datetime: str) -> datetime.datetime:

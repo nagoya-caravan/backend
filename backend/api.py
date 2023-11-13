@@ -7,6 +7,7 @@ from app import app
 from backend.formatter import datetime_formatter
 from backend.json import CalenderJson, EventEditJson
 from backend.manager import CalenderManager, EventManager
+from backend.timezones import TzOffset
 
 
 @app.route("/api/calender", methods=["POST"])
@@ -59,19 +60,21 @@ def put_event(event_id: int):
 def get_events(calender_id: int):
     result = list()
 
+    offset = TzOffset.offset_by_query()
+
     start = request.args.get("start", None)
     if start is None:
         start = datetime.datetime.now()
         start = start.replace(hour=0, minute=0, second=0, microsecond=0)
     else:
-        start = datetime_formatter.str_to_date()
+        start = datetime_formatter.str_to_date(start)
 
     end = request.args.get("end", None)
     if end is None:
         end = datetime.datetime.now()
         end = end.replace(hour=23, minute=59, second=59, microsecond=999999)
     else:
-        end = datetime_formatter.str_to_date()
+        end = datetime_formatter.str_to_date(end)
 
     for event in EventManager.event_by_calender(
             calender_id, start, end
