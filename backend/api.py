@@ -4,7 +4,7 @@ from flask import request
 
 from app import app
 from backend.json import CalenderJson
-from backend.manager import CalenderManager
+from backend.manager import CalenderManager, EventManager
 
 
 @app.route("/api/calender", methods=["POST"])
@@ -27,6 +27,12 @@ def get_calender(calender_id: int):
     return asdict(
         CalenderManager.get(calender_id)
     )
+
+
+@app.route("/api/calender/<int:calender_id>/refresh", methods=["GET"])
+def refresh_calender(calender_id: int):
+    EventManager.refresh(calender_id)
+    return {}
 
 
 @app.route("/api/calender", methods=["GET"])

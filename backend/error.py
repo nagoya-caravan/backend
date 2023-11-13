@@ -1,3 +1,4 @@
+import traceback
 from dataclasses import dataclass
 from enum import Enum
 
@@ -13,6 +14,8 @@ class ErrorId:
 class ErrorIds(Enum):
     INTERNAL_ERROR = ErrorId("server internal error", 500)
     CALENDER_NOT_FOUND = ErrorId("calender not found", 400)
+    ICAL_URL_NOT_FOUND = ErrorId("ical url not found", 400)
+    ICAL_NOT_VALID = ErrorId("ical text is not valid", 400)
 
 
 class ErrorIdException(Exception):
@@ -33,7 +36,7 @@ def response_exception(e: ErrorIdException):
 
 @app.errorhandler(Exception)
 def exception(e: Exception):
-    app.logger.warning(e)
+    app.logger.warning(traceback.format_exc())
     return {
         "error_id": ErrorIds.INTERNAL_ERROR.name,
         "message": e.__str__()
