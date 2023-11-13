@@ -24,3 +24,8 @@ class EventJson:
     end: str | None
     location: str | None
     event_id: int | None = None
+
+
+@dataclass
+class EventEditJson:
+    is_show: bool

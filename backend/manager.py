@@ -1,5 +1,5 @@
 from app import db
-from backend.json import CalenderIdJson, CalenderJson
+from backend.json import CalenderIdJson, CalenderJson, EventEditJson
 from backend.model import CalenderModel
 from backend.repository import CalenderRepository, IcalUrlRepository, EventRepository
 
@@ -56,4 +56,9 @@ class EventManager:
         url_models = IcalUrlRepository.get_models(calender_id)
         for url_model in url_models:
             EventRepository.refresh_ical_url(url_model.ical_id, url_model.url)
+        db.session.commit()
+
+    @staticmethod
+    def edit(event_id: int, event_edit: EventEditJson):
+        EventRepository.edit(event_id, event_edit.is_show)
         db.session.commit()

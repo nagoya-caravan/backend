@@ -86,13 +86,13 @@ Content-Type: application/json
 ## イベント編集
 
 ```http request
-PUT /api/calender/:calender-id/event/<id>
+PUT /api/event/<id>
 Content-Type: application/json
 ```
 
 **body**
 
-[Event](object.md#event)
+> [EventEdit](./object.md#eventedit)
 
 ## イベントリスト
 

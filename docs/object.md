@@ -1,5 +1,6 @@
 # object
 
+* [endpoint](endpoint.md)
 * Typeは[object](object.md)を表す
 
 ## Calender
@@ -32,6 +33,13 @@
 }
 ```
 
+## EventEdit
+
+```json
+{
+  "is_show": true
+}
+```
 ## Error
 
 ```json
@@ -40,3 +48,5 @@
   "message": "message"
 }
 ```
+
+
