@@ -102,9 +102,10 @@ Content-Type: application/json
 ```
 
 **response**
-[
-[Event](object.md#event)
-]
+
+> [
+> [Event](object.md#event)
+> ]
 
 ## 公開イベントリスト
 
@@ -114,7 +115,49 @@ Content-Type: application/json
 ```
 
 **response**
-[
-[Event](object.md#event)
-]
 
+> [
+> [Event](object.md#event)
+> ]
+
+***
+
+## ユーザー作成
+
+```http request
+POST http://localhost:5000/api/user
+Content-Type: application/json
+```
+
+**body**
+
+> [User](object.md#user)
+
+**response**
+
+> [UserId](object.md#userid)
+
+***
+
+## ユーザー取得
+```http request
+GET http://localhost:5000/api/user
+Content-Type: application/json
+Authorization: token
+```
+
+**response**
+
+> [User](object.md#user)
+
+## ユーザー編集
+
+```http request
+PUT http://localhost:5000/api/user
+Content-Type: application/json
+Authorization: token
+```
+
+**body**
+
+> [User](object.md#user)
