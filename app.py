@@ -38,7 +38,7 @@ db: SQLAlchemy = SQLAlchemy()
 db.init_app(app)
 
 # noinspection PyUnresolvedReferences
-import backend.api
+import backend.apis.api
 # noinspection PyUnresolvedReferences
 import backend.model
 
