@@ -1,5 +1,6 @@
 import datetime
 import enum
+import hashlib
 from typing import Self
 
 
@@ -25,3 +26,14 @@ class DatetimeRange:
 
     def during(self):
         return self.end - self.start
+
+
+class Hash:
+    """hashを扱うクラス
+    """
+
+    @staticmethod
+    def hash(value: any) -> str:
+        """hashを行う
+        """
+        return hashlib.sha512(str(value).encode("utf-8")).hexdigest()
