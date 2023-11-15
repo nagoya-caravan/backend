@@ -1,21 +1,35 @@
 from dateutil.rrule import rrulestr
-from flask import request
 
 from app import db
 from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson, UserJson, UserIdJson
 from backend.model import CalenderModel, UserModel
 from backend.repository import CalenderRepository, EventRepository, UserRepository
-from backend.util import DatetimeRange, datetime_formatter, Hash
+from backend.util import DatetimeRange, datetime_formatter
 
 
 class UserManager:
     @staticmethod
-    def get_user_ornone():
-        token = request.headers.get("Authorization", None)
-        if token is None:
+    def user_by_header_ornone():
+        user = UserRepository.model_by_header_ornone()
+        if user is None:
             return None
-        user = UserRepository.model_by_token_ornone(Hash.hash(token))
-        return UserJson(user.user_id, user.user_name)
+        return UserJson(
+            user_name=user.user_name,
+            user_id=user.user_id
+        )
+
+    @staticmethod
+    def user_by_header():
+        user = UserRepository.model_by_header()
+        return UserJson(
+            user_name=user.user_name,
+            user_id=user.user_id
+        )
+
+    @staticmethod
+    def edit(user_json: UserJson):
+        UserRepository.edit(user_json)
+        db.session.commit()
 
     @staticmethod
     def create(user_json: UserJson):

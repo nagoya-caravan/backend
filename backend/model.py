@@ -21,7 +21,8 @@ class UserModel(BaseModel, db.Model):
 
     def apply_user_json(self, user_json: UserJson):
         self.user_name = user_json.user_name
-        self.user_token = Hash.hash(user_json.user_token)
+        if user_json.user_token is not None:
+            self.user_token = Hash.hash(user_json.user_token)
 
     def to_user_json(self):
         return UserJson(

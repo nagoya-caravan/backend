@@ -13,8 +13,8 @@ class UserIdJson:
 
 @dataclass
 class UserJson:
-    user_id: int
     user_name: str
+    user_id: int | None = None
     user_token: str | None = None
 
 

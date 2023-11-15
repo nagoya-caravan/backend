@@ -15,6 +15,13 @@ def post_user():
     )
 
 
+@app.route("/api/user", methods=["PUT"])
+def put_user():
+    user_json = UserJson(**request.json)
+    UserManager.edit(user_json)
+    return {}
+
+
 @app.route("/api/user", methods=["GET"])
 def get_user():
-    return asdict(UserManager.get_user_ornone())
+    return asdict(UserManager.user_by_header())
