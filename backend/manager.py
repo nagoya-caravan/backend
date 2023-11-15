@@ -14,16 +14,16 @@ class UserManager:
         if user is None:
             return None
         return UserJson(
-            user_name=user.user_name,
-            user_id=user.user_id
+            user_name=user.name,
+            user_id=user.uid
         )
 
     @staticmethod
     def user_by_header():
         user = UserRepository.model_by_header()
         return UserJson(
-            user_name=user.user_name,
-            user_id=user.user_id
+            user_name=user.name,
+            user_id=user.uid
         )
 
     @staticmethod
@@ -35,7 +35,7 @@ class UserManager:
     def create(user_json: UserJson):
         result: UserModel = UserRepository.create(user_json)
         db.session.commit()
-        return UserIdJson(result.user_id)
+        return UserIdJson(result.uid)
 
 
 class CalenderManager:
@@ -56,7 +56,7 @@ class CalenderManager:
     def create(calender_json: CalenderJson):
         result: CalenderModel = CalenderRepository.create(calender_json)
         db.session.commit()
-        return CalenderIdJson(result.calender_id)
+        return CalenderIdJson(result.uid)
 
     @staticmethod
     def edit(calender_json: CalenderJson):
@@ -108,7 +108,7 @@ class EventManager:
         jsons = list[EventJson]()
 
         for model in models:
-            model_range = DatetimeRange(model.start, model.end)
+            model_range = DatetimeRange(model.start_date, model.end_date)
 
             if check_range.is_overlap(model_range):
                 jsons.append(model.to_event_json())
@@ -125,8 +125,8 @@ class EventManager:
                 if check_range.end.astimezone() < start_time:
                     break
                 event_json = model.to_event_json()
-                event_json.start = datetime_formatter.date_to_str(start_time)
-                event_json.end = datetime_formatter.date_to_str(end_time)
+                event_json.start_date = datetime_formatter.date_to_str(start_time)
+                event_json.end_date = datetime_formatter.date_to_str(end_time)
                 jsons.append(event_json)
 
         return jsons

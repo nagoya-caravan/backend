@@ -20,6 +20,8 @@ class ErrorIds(Enum):
     ICAL_URL_NOT_VALID = ErrorId("ical url not valid", 400)
     ICAL_TXT_NOT_VALID = ErrorId("ical text is not valid", 400)
 
+    USER_NAME_CONFLICT = ErrorId("user name conflict", 409)
+
 
 class ErrorIdException(Exception):
     def __init__(self, error_id: ErrorIds, message: str | None = None):

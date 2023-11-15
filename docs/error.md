@@ -16,4 +16,7 @@
     * message   : ical url is not valid
 * ICAL_TXT_NOT_VALID
     * message   : ical text is not valid
-* statuscode: 400
+    * statuscode: 400
+* USER_NAME_CONFLICT
+    * message   : user name conflict
+    * statuscode: 409
