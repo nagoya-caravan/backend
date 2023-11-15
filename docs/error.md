@@ -12,6 +12,8 @@
 * ICAL_URL_NOT_FOUND
     * message   : ical url not found
     * statuscode: 400
-* ICAL_NOT_VALID
+* ICAL_URL_NOT_VALID
+    * message   : ical url is not valid
+* ICAL_TXT_NOT_VALID
     * message   : ical text is not valid
 * statuscode: 400

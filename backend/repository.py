@@ -58,14 +58,18 @@ class EventRepository:
 
     @staticmethod
     def refresh_ical(calender_model: CalenderModel):
-        with request.urlopen(request.Request(calender_model.ical_url)) as response:
-            response: client.HTTPResponse
-            ical_text = response.read().decode("utf-8")
+        try:
+            with request.urlopen(request.Request(calender_model.ical_url)) as response:
+                response: client.HTTPResponse
+                ical_text = response.read().decode("utf-8")
+        except ValueError:
+            print(calender_model.ical_url)
+            raise ErrorIdException(ErrorIds.ICAL_URL_NOT_VALID)
         try:
             ical = ics.Calendar(ical_text)
         except TypeError:
             print(ical_text)
-            raise ErrorIdException(ErrorIds.ICAL_NOT_VALID)
+            raise ErrorIdException(ErrorIds.ICAL_TXT_NOT_VALID)
         EventRepository.refresh_ical_event(calender_model, ical.events)
 
     @staticmethod
