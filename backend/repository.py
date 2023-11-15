@@ -13,6 +13,19 @@ from backend.model import CalenderModel, EventModel, UserModel
 class UserRepository:
 
     @staticmethod
+    def get_model_ornone(user_id: int) -> UserModel | None:
+        return db.session.query(UserModel).filter(
+            UserModel.user_id == user_id
+        ).first()
+
+    @staticmethod
+    def get_model(user_id: int):
+        result = UserRepository.get_model_ornone(user_id)
+        if result is None:
+            raise ErrorIdException(ErrorIds.USER_NOT_FOUND)
+        return result
+
+    @staticmethod
     def create(user_json: UserJson):
         model = UserModel()
         model.apply_user_json(user_json)

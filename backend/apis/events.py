@@ -4,10 +4,10 @@ from dataclasses import asdict
 from flask import request
 
 from app import app
-from backend.formatter import datetime_formatter
 from backend.json import EventEditJson
 from backend.manager import EventManager
 from backend.util import DatetimeRange
+from backend.util import datetime_formatter
 
 
 @app.route("/api/event/<int:event_id>", methods=["PUT"])

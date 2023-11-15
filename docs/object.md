@@ -67,6 +67,7 @@ YYYY-mm-dd-HH-MM-SS
 
 ```json
 {
+  "user_id": 0,
   "user_name": "user name",
   "user_token": "user token"
 }

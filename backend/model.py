@@ -5,9 +5,8 @@ from ics.grammar.parse import ContentLine
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime
 
 from app import db
-from backend.formatter import datetime_formatter
 from backend.json import EventJson, CalenderJson, UserJson
-from backend.util import Hash
+from backend.util import Hash, datetime_formatter
 
 
 class BaseModel:
@@ -26,6 +25,7 @@ class UserModel(BaseModel, db.Model):
 
     def to_user_json(self):
         return UserJson(
+            user_id=self.user_id,
             user_name=self.user_name,
         )
 

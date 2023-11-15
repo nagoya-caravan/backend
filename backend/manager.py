@@ -1,11 +1,10 @@
 from dateutil.rrule import rrulestr
 
 from app import db
-from backend.formatter import datetime_formatter
 from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson, UserJson, UserIdJson
 from backend.model import CalenderModel, UserModel
 from backend.repository import CalenderRepository, EventRepository, UserRepository
-from backend.util import DatetimeRange
+from backend.util import DatetimeRange, datetime_formatter
 
 
 class UserManager:

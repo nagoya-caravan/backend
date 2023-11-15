@@ -13,3 +13,8 @@ def post_user():
     return asdict(
         UserManager.create(user)
     )
+
+
+@app.route("/api/user", methods=["GET"])
+def get_user():
+    pass
