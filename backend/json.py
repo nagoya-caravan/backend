@@ -14,7 +14,7 @@ class UserIdJson:
 @dataclass
 class UserJson:
     user_name: str
-    user_token: str
+    user_token: str | None = None
 
 
 @dataclass

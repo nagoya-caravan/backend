@@ -7,6 +7,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime
 from app import db
 from backend.formatter import datetime_formatter
 from backend.json import EventJson, CalenderJson, UserJson
+from backend.util import Hash
 
 
 class BaseModel:
@@ -21,12 +22,11 @@ class UserModel(BaseModel, db.Model):
 
     def apply_user_json(self, user_json: UserJson):
         self.user_name = user_json.user_name
-        self.user_token = user_json.user_token
+        self.user_token = Hash.hash(user_json.user_token)
 
     def to_user_json(self):
         return UserJson(
             user_name=self.user_name,
-            user_token=self.user_token,
         )
 
 

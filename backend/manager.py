@@ -14,7 +14,7 @@ class UserManager:
     def create(user_json: UserJson):
         result: UserModel = UserRepository.create(user_json)
         db.session.commit()
-        return UserIdJson(result.calender_id)
+        return UserIdJson(result.user_id)
 
 
 class CalenderManager:

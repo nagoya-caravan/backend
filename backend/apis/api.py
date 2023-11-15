@@ -1,8 +1,8 @@
 # noinspection PyUnresolvedReferences
-import calenders
+import backend.apis.calenders
 
 # noinspection PyUnresolvedReferences
-import events
+import backend.apis.events
 
 # noinspection PyUnresolvedReferences
-import users
+import backend.apis.users
