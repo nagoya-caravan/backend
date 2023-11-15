@@ -6,8 +6,18 @@ from ics import Event
 
 from app import db
 from backend.error import ErrorIdException, ErrorIds
-from backend.json import CalenderJson
-from backend.model import CalenderModel, EventModel
+from backend.json import CalenderJson, UserJson
+from backend.model import CalenderModel, EventModel, UserModel
+
+
+class UserRepository:
+
+    @staticmethod
+    def create(user_json: UserJson):
+        model = UserModel()
+        model.apply_user_json(user_json)
+        db.session.add(model)
+        return model
 
 
 class CalenderRepository:

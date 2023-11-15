@@ -2,10 +2,19 @@ from dateutil.rrule import rrulestr
 
 from app import db
 from backend.formatter import datetime_formatter
-from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson
-from backend.model import CalenderModel
-from backend.repository import CalenderRepository, EventRepository
+from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson, UserJson, UserIdJson
+from backend.model import CalenderModel, UserModel
+from backend.repository import CalenderRepository, EventRepository, UserRepository
 from backend.util import DatetimeRange
+
+
+class UserManager:
+
+    @staticmethod
+    def create(user_json: UserJson):
+        result: UserModel = UserRepository.create(user_json)
+        db.session.commit()
+        return UserIdJson(result.calender_id)
 
 
 class CalenderManager:

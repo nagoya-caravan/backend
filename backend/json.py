@@ -7,6 +7,11 @@ class CalenderIdJson:
 
 
 @dataclass
+class UserIdJson:
+    user_id: int
+
+
+@dataclass
 class UserJson:
     user_name: str
     user_token: str
