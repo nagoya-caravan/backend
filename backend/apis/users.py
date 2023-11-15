@@ -9,12 +9,12 @@ from backend.manager import UserManager
 
 @app.route("/api/user", methods=["POST"])
 def post_user():
-    user = UserJson(**request.json)
+    user_json = UserJson(**request.json)
     return asdict(
-        UserManager.create(user)
+        UserManager.create(user_json)
     )
 
 
 @app.route("/api/user", methods=["GET"])
 def get_user():
-    pass
+    return asdict(UserManager.get_user_ornone())

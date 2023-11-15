@@ -19,6 +19,12 @@ class UserRepository:
         ).first()
 
     @staticmethod
+    def model_by_token_ornone(hashed_token: str) -> UserModel | None:
+        return db.session.query(UserModel).filter(
+            UserModel.user_token == hashed_token
+        ).first()
+
+    @staticmethod
     def get_model(user_id: int):
         result = UserRepository.get_model_ornone(user_id)
         if result is None:
