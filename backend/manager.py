@@ -41,7 +41,8 @@ class UserManager:
 class CalenderManager:
     @staticmethod
     def get_list(page: int, size: int):
-        models = CalenderRepository.get_list(page, size)
+        user = UserRepository.model_by_header()
+        models = CalenderRepository.get_list(user, page, size)
         jsons = list[CalenderJson]()
         for model in models:
             jsons.append(model.to_calender_json())
@@ -49,12 +50,13 @@ class CalenderManager:
 
     @staticmethod
     def get(calender_id: int):
-        calender_model = CalenderRepository.get_model(calender_id)
+        calender_model = CalenderRepository.self_model(calender_id)
         return calender_model.to_calender_json()
 
     @staticmethod
     def create(calender_json: CalenderJson):
-        result: CalenderModel = CalenderRepository.create(calender_json)
+        user = UserRepository.model_by_header()
+        result: CalenderModel = CalenderRepository.create(user, calender_json)
         db.session.commit()
         return CalenderIdJson(result.uid)
 
@@ -67,7 +69,8 @@ class CalenderManager:
 class EventManager:
     @staticmethod
     def refresh(calender_id: int):
-        EventRepository.refresh_calender_id(calender_id)
+        calender = CalenderRepository.self_model(calender_id)
+        EventRepository.refresh_calender(calender)
         db.session.commit()
 
     @staticmethod

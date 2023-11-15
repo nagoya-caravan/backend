@@ -67,25 +67,32 @@ class UserRepository:
 
 class CalenderRepository:
     @staticmethod
-    def get_list(page: int, size: int):
-        return db.session.query(CalenderModel).offset(page * size).limit(size).all()
+    def get_list(user_model: UserModel, page: int, size: int):
+        return db.session.query(CalenderModel).filter(
+            CalenderModel.user_id == user_model.uid
+        ).offset(page * size).limit(size).all()
 
     @staticmethod
-    def get_model_ornone(calender_id: int) -> CalenderModel | None:
+    def self_model_ornone(calender_id: int) -> CalenderModel | None:
+        user = UserRepository.model_by_header_ornone()
+        if user is None:
+            return None
         return db.session.query(CalenderModel).filter(
-            CalenderModel.uid == calender_id
+            CalenderModel.uid == calender_id,
+            CalenderModel.user_id == user.uid
         ).first()
 
     @staticmethod
-    def get_model(calender_id: int) -> CalenderModel:
-        result = CalenderRepository.get_model_ornone(calender_id)
+    def self_model(calender_id: int) -> CalenderModel:
+        result = CalenderRepository.self_model_ornone(calender_id)
         if result is None:
             raise ErrorIdException(ErrorIds.CALENDER_NOT_FOUND)
         return result
 
     @staticmethod
-    def create(calender_json: CalenderJson):
+    def create(user_model: UserModel, calender_json: CalenderJson):
         calender_model = CalenderModel()
+        calender_model.user_id = user_model.uid
         calender_model.apply_calender_json(calender_json)
         db.session.add(calender_model)
         db.session.commit()
@@ -94,7 +101,7 @@ class CalenderRepository:
 
     @staticmethod
     def edit(calender_json: CalenderJson):
-        calender_model = CalenderRepository.get_model(calender_json.calender_id)
+        calender_model = CalenderRepository.self_model(calender_json.calender_id)
         calender_model.apply_calender_json(calender_model)
         EventRepository.refresh_ical(calender_model)
         return calender_model
@@ -115,7 +122,7 @@ class EventRepository:
         ).all()
 
     @staticmethod
-    def refresh_calender_id(calender_model: CalenderModel):
+    def refresh_calender(calender_model: CalenderModel):
         EventRepository.refresh_ical(calender_model)
 
     @staticmethod

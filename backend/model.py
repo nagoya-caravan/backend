@@ -52,6 +52,16 @@ class CalenderModel(BaseModel, db.Model):
         )
 
 
+class UserCalender(BaseModel, db.Model):
+    __tablename__ = "user_calender"
+    user_id: int | Column = Column(
+        ForeignKey("user.uid", ondelete="CASCADE"), nullable=False, primary_key=True
+    )
+    calender_id: int | Column = Column(
+        ForeignKey("calender.uid", ondelete="CASCADE"), nullable=False, primary_key=True
+    )
+
+
 class EventModel(BaseModel, db.Model):
     __tablename__ = "event"
     uid: int | Column = Column(Integer, primary_key=True, name="uid", autoincrement=True)
