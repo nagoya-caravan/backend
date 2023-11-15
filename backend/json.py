@@ -7,6 +7,18 @@ class CalenderIdJson:
 
 
 @dataclass
+class UserIdJson:
+    user_id: int
+
+
+@dataclass
+class UserJson:
+    user_name: str
+    user_id: int | None = None
+    user_token: str | None = None
+
+
+@dataclass
 class CalenderJson:
     calender_name: str
     ical_url: str

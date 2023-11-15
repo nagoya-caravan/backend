@@ -5,12 +5,30 @@ from ics.grammar.parse import ContentLine
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime
 
 from app import db
-from backend.formatter import datetime_formatter
-from backend.json import EventJson, CalenderJson
+from backend.json import EventJson, CalenderJson, UserJson
+from backend.util import Hash, datetime_formatter
 
 
 class BaseModel:
     __table_args__ = {"extend_existing": True}
+
+
+class UserModel(BaseModel, db.Model):
+    __tablename__ = "user"
+    user_id: int | Column = Column(Integer, primary_key=True, name="user_id", autoincrement=True)
+    user_name: str | Column = Column(String(64), nullable=False)
+    user_token: str | Column = Column(String(128), nullable=False)
+
+    def apply_user_json(self, user_json: UserJson):
+        self.user_name = user_json.user_name
+        if user_json.user_token is not None:
+            self.user_token = Hash.hash(user_json.user_token)
+
+    def to_user_json(self):
+        return UserJson(
+            user_id=self.user_id,
+            user_name=self.user_name,
+        )
 
 
 class CalenderModel(BaseModel, db.Model):

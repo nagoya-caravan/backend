@@ -32,6 +32,8 @@
 }
 ```
 
+***
+
 ## EventEdit
 
 ```json
@@ -39,6 +41,9 @@
   "is_show": true
 }
 ```
+
+***
+
 ## Error
 
 ```json
@@ -48,8 +53,33 @@
 }
 ```
 
+***
+
 ## datetime
 
 ```
 YYYY-mm-dd-HH-MM-SS
 ```
+
+***
+
+## User
+
+```json
+{
+  "user_id": 0,
+  "user_name": "user name",
+  "user_token": "user token"
+}
+```
+
+***
+
+## UserId
+
+```json
+{
+  "user_id": 1
+}
+```
+

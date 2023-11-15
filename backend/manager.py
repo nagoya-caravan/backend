@@ -1,11 +1,41 @@
 from dateutil.rrule import rrulestr
 
 from app import db
-from backend.formatter import datetime_formatter
-from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson
-from backend.model import CalenderModel
-from backend.repository import CalenderRepository, EventRepository
-from backend.util import DatetimeRange
+from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson, UserJson, UserIdJson
+from backend.model import CalenderModel, UserModel
+from backend.repository import CalenderRepository, EventRepository, UserRepository
+from backend.util import DatetimeRange, datetime_formatter
+
+
+class UserManager:
+    @staticmethod
+    def user_by_header_ornone():
+        user = UserRepository.model_by_header_ornone()
+        if user is None:
+            return None
+        return UserJson(
+            user_name=user.user_name,
+            user_id=user.user_id
+        )
+
+    @staticmethod
+    def user_by_header():
+        user = UserRepository.model_by_header()
+        return UserJson(
+            user_name=user.user_name,
+            user_id=user.user_id
+        )
+
+    @staticmethod
+    def edit(user_json: UserJson):
+        UserRepository.edit(user_json)
+        db.session.commit()
+
+    @staticmethod
+    def create(user_json: UserJson):
+        result: UserModel = UserRepository.create(user_json)
+        db.session.commit()
+        return UserIdJson(result.user_id)
 
 
 class CalenderManager:

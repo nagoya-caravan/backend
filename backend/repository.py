@@ -1,13 +1,60 @@
 from http import client
 from urllib import request
 
+import flask
 import ics
 from ics import Event
 
 from app import db
 from backend.error import ErrorIdException, ErrorIds
-from backend.json import CalenderJson
-from backend.model import CalenderModel, EventModel
+from backend.json import CalenderJson, UserJson
+from backend.model import CalenderModel, EventModel, UserModel
+from backend.util import Hash
+
+
+class UserRepository:
+
+    @staticmethod
+    def get_model_ornone(user_id: int) -> UserModel | None:
+        return db.session.query(UserModel).filter(
+            UserModel.user_id == user_id
+        ).first()
+
+    @staticmethod
+    def model_by_header_ornone() -> UserModel | None:
+        token = flask.request.headers.get("Authorization", None)
+        if token is None:
+            return None
+        return db.session.query(UserModel).filter(
+            UserModel.user_token == Hash.hash(token)
+        ).first()
+
+    @staticmethod
+    def model_by_header():
+        result = UserRepository.model_by_header_ornone()
+        if result is None:
+            raise ErrorIdException(ErrorIds.USER_NOT_FOUND)
+        return result
+
+    @staticmethod
+    def get_model(user_id: int):
+        result = UserRepository.get_model_ornone(user_id)
+        if result is None:
+            raise ErrorIdException(ErrorIds.USER_NOT_FOUND)
+        return result
+
+    @staticmethod
+    def create(user_json: UserJson):
+        model = UserModel()
+        model.apply_user_json(user_json)
+        db.session.add(model)
+        return model
+
+    @staticmethod
+    def edit(user_json: UserJson):
+        model = UserRepository.model_by_header()
+        model.apply_user_json(user_json)
+        return model
 
 
 class CalenderRepository:
