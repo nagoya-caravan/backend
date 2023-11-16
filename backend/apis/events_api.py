@@ -38,7 +38,7 @@ def get_events(calender_id: int):
     result = list()
 
     datetime_range = get_datetime_range()
-    for event in EventManager.event_by_calender(
+    for event in EventManager.events_by_calender(
             calender_id, datetime_range
     ):
         result.append(asdict(event))
@@ -50,7 +50,7 @@ def get_public_events(calender_id: int):
     result = list()
 
     datetime_range = get_datetime_range()
-    for event in EventManager.public_event_by_calender(
+    for event in EventManager.readable_events_by_calender(
             calender_id, datetime_range
     ):
         result.append(asdict(event))

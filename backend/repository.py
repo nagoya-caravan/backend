@@ -4,11 +4,12 @@ from urllib import request
 import flask
 import ics
 from ics import Event
+from sqlalchemy import or_, and_
 
 from app import db
 from backend.error import ErrorIdException, ErrorIds
 from backend.json import CalenderJson, UserJson
-from backend.model import CalenderModel, EventModel, UserModel
+from backend.model import CalenderModel, EventModel, UserModel, ShardUserCalenderModel
 from backend.util import Hash
 
 
@@ -57,7 +58,7 @@ class UserRepository:
 
     @staticmethod
     def create(user_json: UserJson):
-        if UserRepository.count_by_name(user_json.user_name) != 1:
+        if UserRepository.count_by_name(user_json.user_name) != 0:
             raise ErrorIdException(ErrorIds.USER_NAME_CONFLICT)
         if UserRepository.count_by_token(Hash.hash(user_json.user_token)) != 0:
             raise ErrorIdException(ErrorIds.TOKEN_CONFLICT)
@@ -96,6 +97,25 @@ class CalenderRepository:
             CalenderModel.uid == calender_id,
             CalenderModel.user_id == user_model.uid
         ).first()
+
+    @staticmethod
+    def readable_model_by_user_id(user_model: UserModel, calender_id: int) -> CalenderModel:
+        result = db.session.query(CalenderModel).outerjoin(
+            ShardUserCalenderModel,
+            ShardUserCalenderModel.calender_id == CalenderModel.uid
+        ).filter(
+            CalenderModel.uid == calender_id,
+            or_(
+                and_(
+                    CalenderModel.uid == ShardUserCalenderModel.calender_id,
+                    ShardUserCalenderModel.user_id == user_model.uid
+                ),
+                CalenderModel.user_id == user_model.uid,
+            )
+        ).first()
+        if result is None:
+            raise ErrorIdException(ErrorIds.CALENDER_NOT_FOUND)
+        return result
 
     @staticmethod
     def model_by_user_id(user_model: UserModel, calender_id: int) -> CalenderModel:

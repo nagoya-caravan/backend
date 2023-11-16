@@ -83,21 +83,14 @@ class EventManager:
         db.session.commit()
 
     @staticmethod
-    def event_by_calender(
-            calender_id: int,
-            datetime_range: DatetimeRange,
-    ):
-        return EventManager.event_by_ical(
-            calender_id, datetime_range
-        )
-
-    @staticmethod
-    def public_event_by_calender(
+    def readable_events_by_calender(
             calender_id: int,
             datetime_range: DatetimeRange
     ):
+        user = UserRepository.model_by_header()
+        calender = CalenderRepository.readable_model_by_user_id(user, calender_id)
         result = list[EventJson]()
-        for event in EventManager.event_by_calender(calender_id, datetime_range):
+        for event in EventManager.__events_by_calender(calender, datetime_range):
             if event.is_show:
                 result.append(event)
                 continue
@@ -107,12 +100,19 @@ class EventManager:
         return result
 
     @staticmethod
-    def event_by_ical(
+    def events_by_calender(
             calender_id: int,
             check_range: DatetimeRange,
     ):
         user = UserRepository.model_by_header()
         calender = CalenderRepository.model_by_user_id(user, calender_id)
+        return EventManager.__events_by_calender(calender, check_range)
+
+    @staticmethod
+    def __events_by_calender(
+            calender: CalenderModel,
+            check_range: DatetimeRange,
+    ):
         models = EventRepository.models_by_calender(calender)
         jsons = list[EventJson]()
 
