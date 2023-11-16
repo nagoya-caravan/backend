@@ -52,7 +52,7 @@ class CalenderModel(BaseModel, db.Model):
         )
 
 
-class ShardUserCalenderModel(BaseModel, db.Model):
+class SharedUserCalenderModel(BaseModel, db.Model):
     __tablename__ = "shared_user_calender"
     user_id: int | Column = Column(
         ForeignKey("user.uid", ondelete="CASCADE"), nullable=False, primary_key=True
@@ -60,6 +60,10 @@ class ShardUserCalenderModel(BaseModel, db.Model):
     calender_id: int | Column = Column(
         ForeignKey("calender.uid", ondelete="CASCADE"), nullable=False, primary_key=True
     )
+
+    def __init__(self, calender_id: int, user_id: int):
+        self.calender_id = calender_id
+        self.user_id = user_id
 
 
 class EventModel(BaseModel, db.Model):

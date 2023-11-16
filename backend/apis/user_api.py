@@ -25,3 +25,8 @@ def put_user():
 @app.route("/api/user", methods=["GET"])
 def get_user():
     return asdict(UserManager.user_by_header())
+
+
+@app.route("/api/user/<int:user_id>", methods=["GET"])
+def get_other_user(user_id: int):
+    return asdict(UserManager.user_by_id(user_id))

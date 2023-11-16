@@ -8,8 +8,8 @@ from sqlalchemy import or_, and_
 
 from app import db
 from backend.error import ErrorIdException, ErrorIds
-from backend.json import CalenderJson, UserJson
-from backend.model import CalenderModel, EventModel, UserModel, ShardUserCalenderModel
+from backend.json import CalenderJson, UserJson, ShareJson
+from backend.model import CalenderModel, EventModel, UserModel, SharedUserCalenderModel
 from backend.util import Hash
 
 
@@ -31,8 +31,21 @@ class UserRepository:
         ).first()
 
     @staticmethod
+    def model_by_id_ornone(user_id: int) -> UserModel | None:
+        return db.session.query(UserModel).filter(
+            UserModel.uid == user_id
+        ).first()
+
+    @staticmethod
     def model_by_header():
         result = UserRepository.model_by_header_ornone()
+        if result is None:
+            raise ErrorIdException(ErrorIds.USER_NOT_FOUND)
+        return result
+
+    @staticmethod
+    def model_by_id(user_id: int):
+        result = UserRepository.model_by_id_ornone(user_id)
         if result is None:
             raise ErrorIdException(ErrorIds.USER_NOT_FOUND)
         return result
@@ -101,14 +114,14 @@ class CalenderRepository:
     @staticmethod
     def readable_model_by_user_id(user_model: UserModel, calender_id: int) -> CalenderModel:
         result = db.session.query(CalenderModel).outerjoin(
-            ShardUserCalenderModel,
-            ShardUserCalenderModel.calender_id == CalenderModel.uid
+            SharedUserCalenderModel,
+            SharedUserCalenderModel.calender_id == CalenderModel.uid
         ).filter(
             CalenderModel.uid == calender_id,
             or_(
                 and_(
-                    CalenderModel.uid == ShardUserCalenderModel.calender_id,
-                    ShardUserCalenderModel.user_id == user_model.uid
+                    CalenderModel.uid == SharedUserCalenderModel.calender_id,
+                    SharedUserCalenderModel.user_id == user_model.uid
                 ),
                 CalenderModel.user_id == user_model.uid,
             )
@@ -228,4 +241,37 @@ class EventRepository:
     def models_by_calender(calender_model: CalenderModel) -> list[EventModel]:
         return db.session.query(EventModel).filter(
             EventModel.calender_id == calender_model.uid
+        ).all()
+
+
+class ShareRepository:
+    @staticmethod
+    def save_share(calender_model: CalenderModel, share_json: ShareJson):
+        share_models: list[SharedUserCalenderModel] = ShareRepository.models(calender_model)
+        edited_models = list[SharedUserCalenderModel]()
+        new_users = [*share_json.user_ids]
+
+        for share_model in share_models:
+            if share_json.user_ids not in new_users:
+                db.session.query(SharedUserCalenderModel).filter(
+                    SharedUserCalenderModel.user_id == share_model.user_id,
+                    SharedUserCalenderModel.calender_id == share_model.calender_id
+                ).delete()
+            else:
+                edited_models.append(share_model)
+                new_users.remove(share_model.user_id)
+
+        for user_id in new_users:
+            new_model = SharedUserCalenderModel(
+                calender_id=calender_model.uid,
+                user_id=user_id
+            )
+            edited_models.append(new_model)
+            db.session.add(new_model)
+        return edited_models
+
+    @staticmethod
+    def models(calender_model: CalenderModel) -> list[SharedUserCalenderModel]:
+        return db.session.query(SharedUserCalenderModel).filter(
+            SharedUserCalenderModel.calender_id == calender_model.uid
         ).all()
