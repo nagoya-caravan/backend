@@ -9,11 +9,12 @@ from flask_sqlalchemy import SQLAlchemy
 dotenv.load_dotenv()
 app = Flask(__name__)
 
+db_url = os.getenv("DB_URL")
 db_user = os.getenv("DB_USER")
-if db_user is None:
+if db_user is None and db_url is None:
     raise ValueError("DB_USER must not be None")
 db_pass = os.getenv("DB_PASS")
-if db_pass is None:
+if db_pass is None and db_url is None:
     raise ValueError("DB_PASS must not be None")
 db_host = os.getenv("DB_HOST")
 if db_host is None:
@@ -24,7 +25,6 @@ if db_port is not None:
 db_name = os.getenv("DB_NAME")
 if db_name is None:
     db_name = "backend"
-db_url = os.getenv("DB_URL")
 if db_url is None:
     db_url = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}"
 
