@@ -22,6 +22,7 @@ class UserJson:
 class CalenderJson:
     calender_name: str
     ical_url: str
+    user_id: int | None = None
     calender_id: int | None = None
 
 

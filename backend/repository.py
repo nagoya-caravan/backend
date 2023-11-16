@@ -4,11 +4,12 @@ from urllib import request
 import flask
 import ics
 from ics import Event
+from sqlalchemy import or_, and_
 
 from app import db
 from backend.error import ErrorIdException, ErrorIds
 from backend.json import CalenderJson, UserJson
-from backend.model import CalenderModel, EventModel, UserModel
+from backend.model import CalenderModel, EventModel, UserModel, ShardUserCalenderModel
 from backend.util import Hash
 
 
@@ -17,7 +18,7 @@ class UserRepository:
     @staticmethod
     def get_model_ornone(user_id: int) -> UserModel | None:
         return db.session.query(UserModel).filter(
-            UserModel.user_id == user_id
+            UserModel.uid == user_id
         ).first()
 
     @staticmethod
@@ -26,7 +27,7 @@ class UserRepository:
         if token is None:
             return None
         return db.session.query(UserModel).filter(
-            UserModel.user_token == Hash.hash(token)
+            UserModel.hash_token == Hash.hash(token)
         ).first()
 
     @staticmethod
@@ -44,7 +45,23 @@ class UserRepository:
         return result
 
     @staticmethod
+    def count_by_name(user_name: str):
+        return db.session.query(UserModel).filter(
+            UserModel.name == user_name
+        ).count()
+
+    @staticmethod
+    def count_by_token(hash_token: str):
+        return db.session.query(UserModel).filter(
+            UserModel.hash_token == hash_token
+        ).count()
+
+    @staticmethod
     def create(user_json: UserJson):
+        if UserRepository.count_by_name(user_json.user_name) != 0:
+            raise ErrorIdException(ErrorIds.USER_NAME_CONFLICT)
+        if UserRepository.count_by_token(Hash.hash(user_json.user_token)) != 0:
+            raise ErrorIdException(ErrorIds.TOKEN_CONFLICT)
         model = UserModel()
         model.apply_user_json(user_json)
         db.session.add(model)
@@ -53,31 +70,64 @@ class UserRepository:
     @staticmethod
     def edit(user_json: UserJson):
         model = UserRepository.model_by_header()
+        if db.session.query(UserModel).filter(
+                UserModel.uid != model.uid,
+                UserModel.name == user_json.user_name
+        ).count() != 0:
+            raise ErrorIdException(ErrorIds.USER_NAME_CONFLICT)
+        if db.session.query(UserModel).filter(
+                UserModel.uid != model.uid,
+                UserModel.hash_token == Hash.hash(user_json.user_token)
+        ).count() != 0:
+            raise ErrorIdException(ErrorIds.TOKEN_CONFLICT)
         model.apply_user_json(user_json)
         return model
 
 
 class CalenderRepository:
     @staticmethod
-    def get_list(page: int, size: int):
-        return db.session.query(CalenderModel).offset(page * size).limit(size).all()
+    def get_list(user_model: UserModel, page: int, size: int):
+        return db.session.query(CalenderModel).filter(
+            CalenderModel.user_id == user_model.uid
+        ).offset(page * size).limit(size).all()
 
     @staticmethod
-    def get_model_ornone(calender_id: int) -> CalenderModel | None:
+    def self_model_ornone(user_model: UserModel, calender_id: int) -> CalenderModel | None:
         return db.session.query(CalenderModel).filter(
-            CalenderModel.calender_id == calender_id
+            CalenderModel.uid == calender_id,
+            CalenderModel.user_id == user_model.uid
         ).first()
 
     @staticmethod
-    def get_model(calender_id: int) -> CalenderModel:
-        result = CalenderRepository.get_model_ornone(calender_id)
+    def readable_model_by_user_id(user_model: UserModel, calender_id: int) -> CalenderModel:
+        result = db.session.query(CalenderModel).outerjoin(
+            ShardUserCalenderModel,
+            ShardUserCalenderModel.calender_id == CalenderModel.uid
+        ).filter(
+            CalenderModel.uid == calender_id,
+            or_(
+                and_(
+                    CalenderModel.uid == ShardUserCalenderModel.calender_id,
+                    ShardUserCalenderModel.user_id == user_model.uid
+                ),
+                CalenderModel.user_id == user_model.uid,
+            )
+        ).first()
         if result is None:
             raise ErrorIdException(ErrorIds.CALENDER_NOT_FOUND)
         return result
 
     @staticmethod
-    def create(calender_json: CalenderJson):
+    def model_by_user_id(user_model: UserModel, calender_id: int) -> CalenderModel:
+        result = CalenderRepository.self_model_ornone(user_model, calender_id)
+        if result is None:
+            raise ErrorIdException(ErrorIds.CALENDER_NOT_FOUND)
+        return result
+
+    @staticmethod
+    def create(user_model: UserModel, calender_json: CalenderJson):
         calender_model = CalenderModel()
+        calender_model.user_id = user_model.uid
         calender_model.apply_calender_json(calender_json)
         db.session.add(calender_model)
         db.session.commit()
@@ -85,23 +135,30 @@ class CalenderRepository:
         return calender_model
 
     @staticmethod
-    def edit(calender_json: CalenderJson):
-        calender_model = CalenderRepository.get_model(calender_json.calender_id)
-        calender_model.apply_calender_json(calender_model)
+    def edit(user_model: UserModel, calender_json: CalenderJson):
+        calender_model = CalenderRepository.model_by_user_id(user_model, calender_json.calender_id)
+        calender_model.apply_calender_json(calender_json)
         EventRepository.refresh_ical(calender_model)
         return calender_model
 
 
+def ical_event_by_uid(ical_events: set[Event], uid: str):
+    for event in ical_events:
+        if event.uid == uid:
+            return event
+    return None
+
+
 class EventRepository:
     @staticmethod
-    def get_events(calender_id: int) -> list[EventModel]:
+    def get_events(calender_model: CalenderModel) -> list[EventModel]:
         return db.session.query(EventModel).filter(
-            EventModel.calender_id == calender_id
+            EventModel.calender_id == calender_model.uid
         ).all()
 
     @staticmethod
-    def refresh_calender_id(calender_id: int):
-        EventRepository.refresh_ical(CalenderRepository.get_model(calender_id))
+    def refresh_calender(calender_model: CalenderModel):
+        EventRepository.refresh_ical(calender_model)
 
     @staticmethod
     def refresh_ical(calender_model: CalenderModel):
@@ -121,14 +178,14 @@ class EventRepository:
 
     @staticmethod
     def refresh_ical_event(calender_model: CalenderModel, ical_events: set[Event]):
-        event_models = EventRepository.get_events(calender_model.calender_id)
+        event_models = EventRepository.get_events(calender_model)
         edited_models = list[EventModel]()
 
         for event_model in event_models:
-            event = EventRepository.ical_event_by_uid(ical_events, event_model.ical_uid)
+            event = ical_event_by_uid(ical_events, event_model.ical_uid)
             if event is None:
                 db.session.query(EventModel).filter(
-                    EventModel.event_id == event_model.event_id
+                    EventModel.uid == event_model.uid
                 ).delete()
             else:
                 edited_models.append(event_model)
@@ -137,7 +194,7 @@ class EventRepository:
 
         for event in ical_events:
             new_model = EventModel(
-                calender_id=calender_model.calender_id,
+                calender_id=calender_model.uid,
                 uid=event.uid
             )
             new_model.apply_ical(event)
@@ -147,33 +204,28 @@ class EventRepository:
             db.session.add(new_model)
 
     @staticmethod
-    def ical_event_by_uid(ical_events: set[Event], uid: str):
-        for event in ical_events:
-            if event.uid == uid:
-                return event
-        return None
-
-    @staticmethod
-    def edit(event_id: int, is_show: bool):
-        event = EventRepository.get_model(event_id)
+    def edit(user_model: UserModel, event_id: int, is_show: bool):
+        event = EventRepository.model_by_user_id(user_model, event_id)
         event.is_show = is_show
         return event
 
     @staticmethod
-    def get_model(event_id: int):
-        result = EventRepository.get_model_ornone(event_id)
+    def model_by_user_id(user_model: UserModel, event_id: int):
+        result = EventRepository.model_by_user_id_ornone(user_model, event_id)
         if result is None:
             raise ErrorIdException(ErrorIds.EVENT_NOT_FOUND)
         return result
 
     @staticmethod
-    def get_model_ornone(event_id: int) -> EventModel | None:
+    def model_by_user_id_ornone(user_model: UserModel, event_id: int) -> EventModel | None:
         return db.session.query(EventModel).filter(
-            EventModel.event_id == event_id
+            EventModel.uid == event_id,
+            EventModel.calender_id == CalenderModel.uid,
+            CalenderModel.user_id == user_model.uid
         ).first()
 
     @staticmethod
-    def get_list(ical_id: int) -> list[EventModel]:
+    def models_by_calender(calender_model: CalenderModel) -> list[EventModel]:
         return db.session.query(EventModel).filter(
-            EventModel.calender_id == ical_id,
+            EventModel.calender_id == calender_model.uid
         ).all()

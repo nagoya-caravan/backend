@@ -14,16 +14,16 @@ class UserManager:
         if user is None:
             return None
         return UserJson(
-            user_name=user.user_name,
-            user_id=user.user_id
+            user_name=user.name,
+            user_id=user.uid
         )
 
     @staticmethod
     def user_by_header():
         user = UserRepository.model_by_header()
         return UserJson(
-            user_name=user.user_name,
-            user_id=user.user_id
+            user_name=user.name,
+            user_id=user.uid
         )
 
     @staticmethod
@@ -35,13 +35,14 @@ class UserManager:
     def create(user_json: UserJson):
         result: UserModel = UserRepository.create(user_json)
         db.session.commit()
-        return UserIdJson(result.user_id)
+        return UserIdJson(result.uid)
 
 
 class CalenderManager:
     @staticmethod
     def get_list(page: int, size: int):
-        models = CalenderRepository.get_list(page, size)
+        user = UserRepository.model_by_header()
+        models = CalenderRepository.get_list(user, page, size)
         jsons = list[CalenderJson]()
         for model in models:
             jsons.append(model.to_calender_json())
@@ -49,48 +50,47 @@ class CalenderManager:
 
     @staticmethod
     def get(calender_id: int):
-        calender_model = CalenderRepository.get_model(calender_id)
+        user = UserRepository.model_by_header()
+        calender_model = CalenderRepository.model_by_user_id(user, calender_id)
         return calender_model.to_calender_json()
 
     @staticmethod
     def create(calender_json: CalenderJson):
-        result: CalenderModel = CalenderRepository.create(calender_json)
+        user = UserRepository.model_by_header()
+        result: CalenderModel = CalenderRepository.create(user, calender_json)
         db.session.commit()
-        return CalenderIdJson(result.calender_id)
+        return CalenderIdJson(result.uid)
 
     @staticmethod
     def edit(calender_json: CalenderJson):
-        CalenderRepository.edit(calender_json)
+        user = UserRepository.model_by_header()
+        CalenderRepository.edit(user, calender_json)
         db.session.commit()
 
 
 class EventManager:
     @staticmethod
     def refresh(calender_id: int):
-        EventRepository.refresh_calender_id(calender_id)
+        user = UserRepository.model_by_header()
+        calender = CalenderRepository.model_by_user_id(user, calender_id)
+        EventRepository.refresh_calender(calender)
         db.session.commit()
 
     @staticmethod
     def edit(event_id: int, event_edit: EventEditJson):
-        EventRepository.edit(event_id, event_edit.is_show)
+        user = UserRepository.model_by_header()
+        EventRepository.edit(user, event_id, event_edit.is_show)
         db.session.commit()
 
     @staticmethod
-    def event_by_calender(
-            calender_id: int,
-            datetime_range: DatetimeRange,
-    ):
-        return EventManager.event_by_ical(
-            calender_id, datetime_range
-        )
-
-    @staticmethod
-    def public_event_by_calender(
+    def readable_events_by_calender(
             calender_id: int,
             datetime_range: DatetimeRange
     ):
+        user = UserRepository.model_by_header()
+        calender = CalenderRepository.readable_model_by_user_id(user, calender_id)
         result = list[EventJson]()
-        for event in EventManager.event_by_calender(calender_id, datetime_range):
+        for event in EventManager.__events_by_calender(calender, datetime_range):
             if event.is_show:
                 result.append(event)
                 continue
@@ -100,15 +100,24 @@ class EventManager:
         return result
 
     @staticmethod
-    def event_by_ical(
+    def events_by_calender(
             calender_id: int,
             check_range: DatetimeRange,
     ):
-        models = EventRepository.get_list(calender_id)
+        user = UserRepository.model_by_header()
+        calender = CalenderRepository.model_by_user_id(user, calender_id)
+        return EventManager.__events_by_calender(calender, check_range)
+
+    @staticmethod
+    def __events_by_calender(
+            calender: CalenderModel,
+            check_range: DatetimeRange,
+    ):
+        models = EventRepository.models_by_calender(calender)
         jsons = list[EventJson]()
 
         for model in models:
-            model_range = DatetimeRange(model.start, model.end)
+            model_range = DatetimeRange(model.start_date, model.end_date)
 
             if check_range.is_overlap(model_range):
                 jsons.append(model.to_event_json())
@@ -125,8 +134,8 @@ class EventManager:
                 if check_range.end.astimezone() < start_time:
                     break
                 event_json = model.to_event_json()
-                event_json.start = datetime_formatter.date_to_str(start_time)
-                event_json.end = datetime_formatter.date_to_str(end_time)
+                event_json.start_date = datetime_formatter.date_to_str(start_time)
+                event_json.end_date = datetime_formatter.date_to_str(end_time)
                 jsons.append(event_json)
 
         return jsons
