@@ -107,7 +107,8 @@ class EventManager:
             calender_id: int,
             check_range: DatetimeRange,
     ):
-        models = EventRepository.get_list(calender_id)
+        user = UserRepository.model_by_header()
+        models = EventRepository.get_list(user, calender_id)
         jsons = list[EventJson]()
 
         for model in models:

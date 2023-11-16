@@ -21,6 +21,7 @@ class ErrorIds(Enum):
     ICAL_TXT_NOT_VALID = ErrorId("ical text is not valid", 400)
 
     USER_NAME_CONFLICT = ErrorId("user name conflict", 409)
+    TOKEN_CONFLICT = ErrorId("token conflict", 409)
 
 
 class ErrorIdException(Exception):

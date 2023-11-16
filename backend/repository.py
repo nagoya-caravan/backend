@@ -50,9 +50,17 @@ class UserRepository:
         ).count()
 
     @staticmethod
+    def count_by_token(hash_token: str):
+        return db.session.query(UserModel).filter(
+            UserModel.hash_token == hash_token
+        ).count()
+
+    @staticmethod
     def create(user_json: UserJson):
-        if UserRepository.count_by_name(user_json.user_name) != 0:
+        if UserRepository.count_by_name(user_json.user_name) != 1:
             raise ErrorIdException(ErrorIds.USER_NAME_CONFLICT)
+        if UserRepository.count_by_token(Hash.hash(user_json.user_token)) != 0:
+            raise ErrorIdException(ErrorIds.TOKEN_CONFLICT)
         model = UserModel()
         model.apply_user_json(user_json)
         db.session.add(model)
@@ -61,6 +69,16 @@ class UserRepository:
     @staticmethod
     def edit(user_json: UserJson):
         model = UserRepository.model_by_header()
+        if db.session.query(UserModel).filter(
+                UserModel.uid != model.uid,
+                UserModel.name == user_json.user_name
+        ).count() != 0:
+            raise ErrorIdException(ErrorIds.USER_NAME_CONFLICT)
+        if db.session.query(UserModel).filter(
+                UserModel.uid != model.uid,
+                UserModel.hash_token == Hash.hash(user_json.user_token)
+        ).count() != 0:
+            raise ErrorIdException(ErrorIds.TOKEN_CONFLICT)
         model.apply_user_json(user_json)
         return model
 
@@ -102,7 +120,7 @@ class CalenderRepository:
     @staticmethod
     def edit(calender_json: CalenderJson):
         calender_model = CalenderRepository.self_model(calender_json.calender_id)
-        calender_model.apply_calender_json(calender_model)
+        calender_model.apply_calender_json(calender_json)
         EventRepository.refresh_ical(calender_model)
         return calender_model
 
@@ -183,12 +201,17 @@ class EventRepository:
 
     @staticmethod
     def get_model_ornone(event_id: int) -> EventModel | None:
+        user = UserRepository.model_by_header()
         return db.session.query(EventModel).filter(
-            EventModel.uid == event_id
+            EventModel.uid == event_id,
+            EventModel.calender_id == CalenderModel.uid,
+            CalenderModel.user_id == user.uid
         ).first()
 
     @staticmethod
-    def get_list(ical_id: int) -> list[EventModel]:
+    def get_list(user_model: UserModel, ical_id: int) -> list[EventModel]:
         return db.session.query(EventModel).filter(
             EventModel.calender_id == ical_id,
+            EventModel.calender_id == CalenderModel.uid,
+            CalenderModel.user_id == user_model.uid
         ).all()

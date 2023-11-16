@@ -17,7 +17,7 @@ class UserModel(BaseModel, db.Model):
     __tablename__ = "user"
     uid: int | Column = Column(Integer, primary_key=True, name="uid", autoincrement=True)
     name: str | Column = Column(String(64), nullable=False, unique=True)
-    hash_token: str | Column = Column(String(128), nullable=False)
+    hash_token: str | Column = Column(String(128), nullable=False, unique=True)
 
     def apply_user_json(self, user_json: UserJson):
         self.name = user_json.user_name
