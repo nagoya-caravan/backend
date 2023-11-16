@@ -1,9 +1,9 @@
 from dateutil.rrule import rrulestr
 
 from app import db
-from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson, UserJson, UserIdJson
+from backend.json import CalenderIdJson, CalenderJson, EventEditJson, EventJson, UserJson, UserIdJson, ShareJson
 from backend.model import CalenderModel, UserModel
-from backend.repository import CalenderRepository, EventRepository, UserRepository
+from backend.repository import CalenderRepository, EventRepository, UserRepository, ShareRepository
 from backend.util import DatetimeRange, datetime_formatter
 
 
@@ -139,3 +139,23 @@ class EventManager:
                 jsons.append(event_json)
 
         return jsons
+
+
+class ShareManager:
+    @staticmethod
+    def save(share_json: ShareJson):
+        user = UserRepository.model_by_header()
+        calender = CalenderRepository.model_by_user_id(user, share_json.calender_id)
+        ShareRepository.save_share(calender, share_json)
+
+    @staticmethod
+    def get(calender_id: int):
+        user = UserRepository.model_by_header()
+        calender = CalenderRepository.model_by_user_id(user, calender_id)
+        ids = list[int]()
+        for model in ShareRepository.models(calender):
+            ids.append(model.user_id)
+        return ShareJson(
+            calender_id=calender_id,
+            user_ids=ids
+        )

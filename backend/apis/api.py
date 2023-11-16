@@ -6,3 +6,6 @@ import backend.apis.event_api
 
 # noinspection PyUnresolvedReferences
 import backend.apis.user_api
+
+# noinspection PyUnresolvedReferences
+import backend.apis.share_api

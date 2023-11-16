@@ -43,3 +43,9 @@ class EventJson:
 @dataclass
 class EventEditJson:
     is_show: bool
+
+
+@dataclass
+class ShareJson:
+    calender_id: int
+    user_ids: list[int]
