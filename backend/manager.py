@@ -27,6 +27,14 @@ class UserManager:
         )
 
     @staticmethod
+    def user_by_id(user_id: int):
+        user = UserRepository.model_by_id(user_id)
+        return UserJson(
+            user_name=user.name,
+            user_id=user.uid
+        )
+
+    @staticmethod
     def edit(user_json: UserJson):
         UserRepository.edit(user_json)
         db.session.commit()

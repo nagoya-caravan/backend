@@ -31,8 +31,21 @@ class UserRepository:
         ).first()
 
     @staticmethod
+    def model_by_id_ornone(user_id: int) -> UserModel | None:
+        return db.session.query(UserModel).filter(
+            UserModel.uid == user_id
+        ).first()
+
+    @staticmethod
     def model_by_header():
         result = UserRepository.model_by_header_ornone()
+        if result is None:
+            raise ErrorIdException(ErrorIds.USER_NOT_FOUND)
+        return result
+
+    @staticmethod
+    def model_by_id(user_id: int):
+        result = UserRepository.model_by_id_ornone(user_id)
         if result is None:
             raise ErrorIdException(ErrorIds.USER_NOT_FOUND)
         return result
