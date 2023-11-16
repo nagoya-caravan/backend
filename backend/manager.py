@@ -50,7 +50,8 @@ class CalenderManager:
 
     @staticmethod
     def get(calender_id: int):
-        calender_model = CalenderRepository.self_model(calender_id)
+        user = UserRepository.model_by_header()
+        calender_model = CalenderRepository.model_by_user_id(user, calender_id)
         return calender_model.to_calender_json()
 
     @staticmethod
@@ -62,20 +63,23 @@ class CalenderManager:
 
     @staticmethod
     def edit(calender_json: CalenderJson):
-        CalenderRepository.edit(calender_json)
+        user = UserRepository.model_by_header()
+        CalenderRepository.edit(user, calender_json)
         db.session.commit()
 
 
 class EventManager:
     @staticmethod
     def refresh(calender_id: int):
-        calender = CalenderRepository.self_model(calender_id)
+        user = UserRepository.model_by_header()
+        calender = CalenderRepository.model_by_user_id(user, calender_id)
         EventRepository.refresh_calender(calender)
         db.session.commit()
 
     @staticmethod
     def edit(event_id: int, event_edit: EventEditJson):
-        EventRepository.edit(event_id, event_edit.is_show)
+        user = UserRepository.model_by_header()
+        EventRepository.edit(user, event_id, event_edit.is_show)
         db.session.commit()
 
     @staticmethod
@@ -108,7 +112,8 @@ class EventManager:
             check_range: DatetimeRange,
     ):
         user = UserRepository.model_by_header()
-        models = EventRepository.get_list(user, calender_id)
+        calender = CalenderRepository.model_by_user_id(user, calender_id)
+        models = EventRepository.models_by_calender(calender)
         jsons = list[EventJson]()
 
         for model in models:

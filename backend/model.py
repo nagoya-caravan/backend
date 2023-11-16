@@ -52,8 +52,8 @@ class CalenderModel(BaseModel, db.Model):
         )
 
 
-class UserCalender(BaseModel, db.Model):
-    __tablename__ = "user_calender"
+class ShardUserCalenderModel(BaseModel, db.Model):
+    __tablename__ = "shared_user_calender"
     user_id: int | Column = Column(
         ForeignKey("user.uid", ondelete="CASCADE"), nullable=False, primary_key=True
     )
