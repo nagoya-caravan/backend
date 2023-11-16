@@ -24,12 +24,16 @@ if db_port is not None:
 db_name = os.getenv("DB_NAME")
 if db_name is None:
     db_name = "backend"
+db_url = os.getenv("DB_URL")
+if db_url is None:
+    db_url = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}"
+
 cors_list = os.getenv("CORS_LIST")
 if cors_list is None:
     cors_list = "*"
 
 CORS(app, resources={"/api/*": {"origins": cors_list.split(",")}})
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}"
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['JSON_AS_ASCII'] = False
 app.config["JWT_SECRET_KEY"] = os.getenv("LOGIN_SECRET")
 
