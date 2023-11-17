@@ -9,7 +9,7 @@ from sqlalchemy import or_, and_
 from app import db
 from backend.error import ErrorIdException, ErrorIds
 from backend.json import CalenderJson, UserJson, ShareJson
-from backend.model import CalenderModel, EventModel, UserModel, SharedUserCalenderModel
+from backend.model import CalenderModel, EventModel, UserModel, SharedModel
 from backend.util import Hash
 
 
@@ -114,14 +114,14 @@ class CalenderRepository:
     @staticmethod
     def readable_model_by_user_id(user_model: UserModel, calender_id: int) -> CalenderModel:
         result = db.session.query(CalenderModel).outerjoin(
-            SharedUserCalenderModel,
-            SharedUserCalenderModel.calender_id == CalenderModel.uid
+            SharedModel,
+            SharedModel.calender_id == CalenderModel.uid
         ).filter(
             CalenderModel.uid == calender_id,
             or_(
                 and_(
-                    CalenderModel.uid == SharedUserCalenderModel.calender_id,
-                    SharedUserCalenderModel.user_id == user_model.uid
+                    CalenderModel.uid == SharedModel.calender_id,
+                    SharedModel.user_id == user_model.uid
                 ),
                 CalenderModel.user_id == user_model.uid,
             )
@@ -153,6 +153,13 @@ class CalenderRepository:
         calender_model.apply_calender_json(calender_json)
         EventRepository.refresh_ical(calender_model)
         return calender_model
+
+    @staticmethod
+    def delete(user_model: UserModel, calender_id: int):
+        db.session.query(CalenderModel).filter(
+            CalenderModel.user_id == user_model.uid,
+            CalenderModel.uid == calender_id
+        ).delete()
 
 
 def ical_event_by_uid(ical_events: set[Event], uid: str):
@@ -247,22 +254,22 @@ class EventRepository:
 class ShareRepository:
     @staticmethod
     def save_share(calender_model: CalenderModel, share_json: ShareJson):
-        share_models: list[SharedUserCalenderModel] = ShareRepository.models(calender_model)
-        edited_models = list[SharedUserCalenderModel]()
+        share_models: list[SharedModel] = ShareRepository.models(calender_model)
+        edited_models = list[SharedModel]()
         new_users = [*share_json.user_ids]
 
         for share_model in share_models:
             if share_json.user_ids not in new_users:
-                db.session.query(SharedUserCalenderModel).filter(
-                    SharedUserCalenderModel.user_id == share_model.user_id,
-                    SharedUserCalenderModel.calender_id == share_model.calender_id
+                db.session.query(SharedModel).filter(
+                    SharedModel.user_id == share_model.user_id,
+                    SharedModel.calender_id == share_model.calender_id
                 ).delete()
             else:
                 edited_models.append(share_model)
                 new_users.remove(share_model.user_id)
 
         for user_id in new_users:
-            new_model = SharedUserCalenderModel(
+            new_model = SharedModel(
                 calender_id=calender_model.uid,
                 user_id=user_id
             )
@@ -271,7 +278,7 @@ class ShareRepository:
         return edited_models
 
     @staticmethod
-    def models(calender_model: CalenderModel) -> list[SharedUserCalenderModel]:
-        return db.session.query(SharedUserCalenderModel).filter(
-            SharedUserCalenderModel.calender_id == calender_model.uid
+    def models(calender_model: CalenderModel) -> list[SharedModel]:
+        return db.session.query(SharedModel).filter(
+            SharedModel.calender_id == calender_model.uid
         ).all()

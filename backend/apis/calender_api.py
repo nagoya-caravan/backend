@@ -23,6 +23,12 @@ def put_calender(calender_id: int):
     return {}
 
 
+@app.route("/api/calender/<int:calender_id>", methods=["DELETE"])
+def delete_calender(calender_id: int):
+    CalenderManager.delete(calender_id)
+    return {}
+
+
 @app.route("/api/calender/<int:calender_id>", methods=["GET"])
 def get_calender(calender_id: int):
     return asdict(

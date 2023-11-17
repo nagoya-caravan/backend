@@ -75,6 +75,12 @@ class CalenderManager:
         CalenderRepository.edit(user, calender_json)
         db.session.commit()
 
+    @staticmethod
+    def delete(calender_id: int):
+        user = UserRepository.model_by_header()
+        CalenderRepository.delete(user, calender_id)
+        db.session.commit()
+
 
 class EventManager:
     @staticmethod
