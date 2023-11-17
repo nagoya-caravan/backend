@@ -109,6 +109,7 @@ class EventManager:
                 result.append(event)
                 continue
             result.append(EventJson(
+                event_id=event.event_id,
                 calender_id=event.calender_id,
                 is_show=event.is_show,
                 start=event.start,
@@ -118,7 +119,6 @@ class EventManager:
                 event_title=None,
                 description=None,
                 location=None,
-                event_id=None,
             ))
         return result
 
