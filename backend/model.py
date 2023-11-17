@@ -52,7 +52,7 @@ class CalenderModel(BaseModel, db.Model):
         )
 
 
-class SharedUserCalenderModel(BaseModel, db.Model):
+class SharedModel(BaseModel, db.Model):
     __tablename__ = "shared_user_calender"
     user_id: int | Column = Column(
         ForeignKey("user.uid", ondelete="CASCADE"), nullable=False, primary_key=True
