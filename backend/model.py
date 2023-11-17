@@ -46,9 +46,9 @@ class CalenderModel(BaseModel, db.Model):
 
     def to_calender_json(self):
         return CalenderJson(
-            self.name,
-            self.ical_url,
-            self.uid,
+            calender_name=self.name,
+            ical_url=self.ical_url,
+            calender_id=self.uid,
         )
 
 

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="pip freeze" type="PythonConfigurationType" factoryName="Python">
-    <output_file path="$PROJECT_DIR$/../backend\requirements.txt" is_save="true" />
+    <output_file path="$PROJECT_DIR$\requirements.txt" is_save="true" />
     <module name="hazakura-backend" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

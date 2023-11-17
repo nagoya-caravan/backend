@@ -60,7 +60,9 @@ class CalenderManager:
     def get(calender_id: int):
         user = UserRepository.model_by_header()
         calender_model = CalenderRepository.model_by_user_id(user, calender_id)
-        return calender_model.to_calender_json()
+        result = calender_model.to_calender_json()
+        result.user_id = user.uid
+        return result
 
     @staticmethod
     def create(calender_json: CalenderJson):
@@ -157,8 +159,8 @@ class EventManager:
                 if check_range.end.astimezone() < start_time:
                     break
                 event_json = model.to_event_json()
-                event_json.start_date = datetime_formatter.date_to_str(start_time)
-                event_json.end_date = datetime_formatter.date_to_str(end_time)
+                event_json.start = datetime_formatter.date_to_str(start_time)
+                event_json.end = datetime_formatter.date_to_str(end_time)
                 jsons.append(event_json)
 
         return jsons
