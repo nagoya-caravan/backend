@@ -32,12 +32,12 @@ class EventJson:
     is_show: bool
     start: str
     end: str
+    all_day: bool
     ical_uid: str | None
     event_title: str | None
     description: str | None
     location: str | None
     event_id: int | None = None
-    all_day: bool = False
 
 
 @dataclass

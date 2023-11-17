@@ -109,7 +109,16 @@ class EventManager:
                 result.append(event)
                 continue
             result.append(EventJson(
-                event.calender_id, event.is_show, event.start, event.end, None, None, None, None,
+                calender_id=event.calender_id,
+                is_show=event.is_show,
+                start=event.start,
+                end=event.end,
+                all_day=event.all_day,
+                ical_uid=None,
+                event_title=None,
+                description=None,
+                location=None,
+                event_id=None,
             ))
         return result
 
